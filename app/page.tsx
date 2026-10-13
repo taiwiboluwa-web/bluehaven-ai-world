@@ -9,7 +9,9 @@ const WorldScene = dynamic(() => import("@/components/WorldScene"), {
   loading: () => <div className="scene-loading" role="status">Preparing your village…</div>,
 });
 
-const BUILD_PLOTS: [number, number][] = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];\n\ntype Project = {
+const BUILD_PLOTS: [number, number][] = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];
+
+type Project = {
   id: string;
   name: string;
   kind: string;
