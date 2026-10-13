@@ -72,7 +72,7 @@ export default function CompanyCommandPage() {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>{suggestions.map((s) => <button key={s} type="button" onClick={() => setGoal(s)} style={{ background: "#1a1e26", color: "#cbd0db", border: "1px solid #343a45", borderRadius: 8, padding: "9px 11px", cursor: "pointer", textAlign: "left" }}>{s}</button>)}</div>
           <label style={{ display: "block", color: "#c4c8d0", fontSize: 13, margin: "22px 0 8px" }}>CHO ADMIN TOKEN OR AGENT SERVICE TOKEN</label>
           <input type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} required placeholder="Used for this request only; never saved" style={{ width: "100%", boxSizing: "border-box", padding: 13, background: "#090b0f", border: "1px solid #363b45", borderRadius: 9, color: "#fff" }} />
-          <p style={{ color: "#858b97", fontSize: 12, lineHeight: 1.6 }}>The token remains in this page's memory. This version runs model-backed work and records results; it does not silently access shell, browser, GitHub, email, or deployment tools.</p>
+          <p style={{ color: "#858b97", fontSize: 12, lineHeight: 1.6 }}>The token remains in this page&apos;s memory. This version runs model-backed work and records results; it does not silently access shell, browser, GitHub, email, or deployment tools.</p>
           <button disabled={loading} type="submit" style={{ marginTop: 12, width: "100%", border: 0, borderRadius: 10, padding: 15, background: loading ? "#746b42" : "#ffde59", color: "#141414", fontWeight: 800, cursor: loading ? "wait" : "pointer" }}>{loading ? "COORDINATING AGENTS…" : "START COLLABORATIVE MISSION ↗"}</button>
         </section>
 
