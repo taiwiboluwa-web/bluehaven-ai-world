@@ -144,6 +144,7 @@ export default function Home() {
   function handleDistrictSelect(district: DistrictId) {
     setSelectedDistrict(district);
     if (district === "builder") {
+      setSelectedDistrict(null);
       setActionError("");
       setShowWizard(true);
     } else if (district === "hq") {
