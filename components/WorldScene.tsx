@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, Float, OrbitControls, Sparkles } from "@react-three/drei";
+import { ContactShadows, Float, OrbitControls, RoundedBox, Sparkles } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -26,24 +26,50 @@ function Tree({position,scale=1,autumn=false}:{position:[number,number,number];s
   </group>;
 }
 function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:number;scale?:number}) {
-  const walls=["#f0d6a1","#d5e4ce","#d5c5ef","#f4df9a"];
-  const roofs=["#a84435","#477b9b","#7650a5","#b76535"];
-  const trim=["#f0dfbc","#e7e7dc","#e2d8f6","#f5e7b8"];
+  const walls=["#e9d9b8","#d1e2d0","#d7c9ef","#f0d8a7","#c8e0e5","#e6dfd1"];
+  const roofs=["#a94737","#355d7a","#7651a3","#b66c35","#367c70","#354a59"];
+  const accents=["#f3c969","#80dcb6","#c2a5ff","#ffc45d","#6ed8e4","#f3d59a"];
+  const wall=walls[kind%walls.length], roof=roofs[kind%roofs.length], accent=accents[kind%accents.length];
+  const Block=({p,s,color,r=.025,rough=.75,metal=0,emissive,glow=0}:{p:[number,number,number];s:[number,number,number];color:string;r?:number;rough?:number;metal?:number;emissive?:string;glow?:number})=><RoundedBox position={p} args={s} radius={r} smoothness={3} castShadow receiveShadow><Material color={color} roughness={rough} metalness={metal} emissive={emissive} emissiveIntensity={glow}/></RoundedBox>;
   return <group position={position} scale={scale}>
-    <mesh position={[0,.1,0]} receiveShadow castShadow><boxGeometry args={[1.1,.18,1.02]}/><Material color="#8c8977"/></mesh>
-    <mesh position={[0,.55,0]} receiveShadow castShadow><boxGeometry args={[.91,.78,.82]}/><Material color={walls[kind%4]} roughness={.95}/></mesh>
-    <mesh position={[0,1.01,0]} castShadow><coneGeometry args={[.79,.62,4]}/><Material color={roofs[kind%4]} roughness={.91}/></mesh>
-    <mesh position={[0,.49,.417]}><boxGeometry args={[.19,.45,.025]}/><Material color="#604532"/></mesh>
-    <mesh position={[0,.47,.435]}><boxGeometry args={[.12,.34,.02]}/><Material color="#987052"/></mesh>
-    {[-.29,.29].map((x,i)=><group key={i} position={[x,.63,.425]}>
-      <mesh><boxGeometry args={[.19,.2,.035]}/><Material color={trim[kind%4]}/></mesh>
-      <mesh position={[0,0,.023]}><boxGeometry args={[.135,.145,.018]}/><Material color="#80b7bf" roughness={.28} metalness={.12} emissive="#315d63" emissiveIntensity={.16}/></mesh>
-      <mesh position={[0,0,.035]}><boxGeometry args={[.014,.16,.012]}/><Material color={trim[kind%4]}/></mesh>
-      <mesh position={[0,0,.035]}><boxGeometry args={[.15,.014,.012]}/><Material color={trim[kind%4]}/></mesh>
+    {/* Heavy layered foundation, with visible bevels and a warm metallic reveal. */}
+    <Block p={[0,.12,0]} s={[1.22,.22,1.13]} color="#8d9483" r={.055}/>
+    <Block p={[0,.245,0]} s={[1.12,.065,1.04]} color="#e1cfaa" r={.025} rough={.62}/>
+    <Block p={[0,.65,0]} s={[.96,.75,.84]} color={wall} r={.055} rough={.86}/>
+    {/* Recessed glass curtain wall: separate panes, mullions and frame create real depth. */}
+    <Block p={[0,.69,.426]} s={[.72,.54,.035]} color="#5a756e" r={.018} rough={.2} metal={.15} emissive="#3a7c7a" glow={.12}/>
+    {[-.27,-.09,.09,.27].map((x,i)=><Block key={"glass-"+i} p={[x,.69,.45]} s={[.145,.46,.022]} color={i%2?"#86c9c5":"#6ca8b3"} r={.009} rough={.19} metal={.12} emissive="#4c9b9d" glow={.13}/>)}
+    {[-.18,.18].map(x=><Block key={"mullion-"+x} p={[x,.69,.466]} s={[.025,.53,.028]} color="#ead6a4" r={.007} metal={.32}/>)}
+    <Block p={[0,.69,.468]} s={[.74,.035,.03]} color="#f1dfb4" r={.008} metal={.24}/>
+    {/* Front portal and canopy. */}
+    <Block p={[0,.43,.46]} s={[.22,.47,.06]} color="#3c4c4b" r={.025} rough={.5} metal={.15}/>
+    <Block p={[0,.43,.495]} s={[.14,.34,.018]} color="#80bfc0" r={.012} rough={.18} metal={.15} emissive="#3d7e83" glow={.2}/>
+    <Block p={[0,.91,.51]} s={[.67,.085,.24]} color={roof} r={.025} rough={.48} metal={.16}/>
+    <Block p={[0,.86,.63]} s={[.69,.025,.025]} color={accent} r={.008} metal={.28} emissive={accent} glow={.25}/>
+    {[-.43,.43].map((x,i)=><group key={"column-"+i}>
+      <Block p={[x,.65,.44]} s={[.075,.72,.09]} color="#f1e4c8" r={.018} rough={.65}/>
+      <Block p={[x,.99,.45]} s={[.13,.065,.13]} color={accent} r={.014} metal={.28}/>
+      <Block p={[x,.68,.496]} s={[.025,.15,.02]} color={accent} r={.006} emissive={accent} glow={.3}/>
     </group>)}
-    <mesh position={[.28,1.23,-.2]} castShadow><boxGeometry args={[.16,.46,.17]}/><Material color="#a99a86"/></mesh>
-    <mesh position={[.28,1.48,-.2]}><boxGeometry args={[.19,.055,.2]}/><Material color="#5e5a54"/></mesh>
-    <mesh position={[0,1.26,0]}><sphereGeometry args={[.065,12,12]}/><Material color={kind%2?"#b7a5ff":"#ffdb79"} emissive={kind%2?"#6651b6":"#d9a33e"} emissiveIntensity={.8}/></mesh>
+    {/* Roof slab, parapet, planted inset and mechanical equipment. */}
+    <Block p={[0,1.055,0]} s={[1.12,.15,1.0]} color={roof} r={.045} rough={.48} metal={.16}/>
+    <Block p={[0,1.145,0]} s={[.86,.045,.75]} color="#628c59" r={.025} rough={.92}/>
+    {[-.48,.48].map(x=><Block key={"parapet-x-"+x} p={[x,1.17,0]} s={[.075,.12,.94]} color={accent} r={.014} metal={.25}/>)}
+    <Block p={[0,1.17,-.43]} s={[.96,.12,.07]} color={accent} r={.014} metal={.25}/>
+    <Block p={[.24,1.25,-.18]} s={[.28,.17,.26]} color="#354744" r={.025} rough={.45} metal={.32}/>
+    {[-.07,0,.07].map(x=><Block key={"vent-"+x} p={[.24+x,1.345,-.18]} s={[.025,.025,.19]} color="#d8c9a5" r={.006} metal={.35}/>)}
+    <Block p={[-.27,1.25,-.15]} s={[.13,.14,.18]} color="#e6dfca" r={.018}/>
+    <Block p={[-.27,1.335,-.15]} s={[.16,.025,.2]} color={accent} r={.008} metal={.28}/>
+    {/* Tiny glowing rooftop beacon makes the building feel like an active game asset. */}
+    <mesh position={[0,1.38,.05]} castShadow><cylinderGeometry args={[.035,.05,.09,8]}/><Material color="#d5c49d" metalness={.45} roughness={.3}/></mesh>
+    <mesh position={[0,1.46,.05]} castShadow><icosahedronGeometry args={[.075,1]}/><Material color={accent} roughness={.22} metalness={.2} emissive={accent} emissiveIntensity={.9}/></mesh>
+    <Sparkles count={kind%3===1?5:3} position={[0,1.44,.05]} scale={[.3,.28,.3]} size={1.5} speed={.2} color={accent}/>
+    {/* Side service panels and layered trim catch the key light as the camera orbits. */}
+    <Block p={[-.493,.63,0]} s={[.035,.53,.42]} color={roof} r={.012} rough={.5}/>
+    <Block p={[.493,.63,0]} s={[.035,.53,.42]} color={roof} r={.012} rough={.5}/>
+    <Block p={[0,.285,.02]} s={[1.14,.045,1.06]} color={accent} r={.012} metal={.22}/>
+    <Block p={[0,.16,.61]} s={[.48,.09,.2]} color="#d5c3a0" r={.025}/>
+    <Block p={[0,.11,.73]} s={[.38,.07,.16]} color="#b8a581" r={.02}/>
   </group>;
 }
 function Agent({start,color,phase=0}:{start:[number,number,number];color:string;phase?:number}) {
