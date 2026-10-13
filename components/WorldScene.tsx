@@ -74,12 +74,26 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
 }
 function Agent({start,color,phase=0}:{start:[number,number,number];color:string;phase?:number}) {
   const ref=useRef<THREE.Group>(null);
-  useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime*.24+phase;ref.current.position.x=start[0]+Math.sin(t)*.6;ref.current.position.z=start[2]+Math.cos(t*1.13)*.55;ref.current.position.y=start[1]+.1+Math.abs(Math.sin(t*3))*.08;ref.current.rotation.y=-t*.8;}});
+  const limbs=useRef<THREE.Group>(null);
+  useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime*.42+phase;ref.current.position.x=start[0]+Math.sin(t)*.72;ref.current.position.z=start[2]+Math.cos(t*1.13)*.62;ref.current.position.y=start[1]+.035+Math.abs(Math.sin(t*3))*.035;ref.current.rotation.y=-t*.8;if(limbs.current)limbs.current.rotation.x=Math.sin(t*5)*.08;}});
   return <group ref={ref} position={start}>
-    <mesh position={[0,.12,0]} castShadow><capsuleGeometry args={[.105,.2,4,8]}/><Material color={color} metalness={.25} roughness={.35}/></mesh>
-    <mesh position={[0,.34,.015]} castShadow><sphereGeometry args={[.105,16,12]}/><Material color="#d9e8e3" metalness={.18} roughness={.25}/></mesh>
-    <mesh position={[0,.34,.11]}><sphereGeometry args={[.045,12,8]}/><Material color={color} emissive={color} emissiveIntensity={1.1}/></mesh>
-    <mesh position={[0,-.02,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.13,.18,20]}/><meshBasicMaterial color={color} transparent opacity={.65}/></mesh>
+    {/* Compact service robot: armored torso, articulated limbs, face visor and utility pack. */}
+    <mesh position={[0,.24,0]} castShadow><capsuleGeometry args={[.115,.24,4,10]}/><Material color={color} metalness={.48} roughness={.3}/></mesh>
+    <mesh position={[0,.43,.012]} castShadow><sphereGeometry args={[.125,16,12]}/><Material color="#dce9e7" metalness={.3} roughness={.24}/></mesh>
+    <mesh position={[0,.435,.119]}><RoundedBox args={[.145,.055,.025]} radius={.018} smoothness={3}><meshStandardMaterial color="#203b43" metalness={.45} roughness={.2} emissive={color} emissiveIntensity={.45}/></RoundedBox></mesh>
+    {[-1,1].map(side=><group key={side} position={[side*.145,.27,0]} rotation={[0,0,side*.12]}>
+      <mesh position={[0,-.005,0]} castShadow><capsuleGeometry args={[.035,.14,3,6]}/><Material color="#c5d3cb" metalness={.42} roughness={.35}/></mesh>
+      <mesh position={[0,-.105,.012]} castShadow><sphereGeometry args={[.042,8,6]}/><Material color={color} metalness={.25} roughness={.32}/></mesh>
+    </group>)}
+    <group ref={limbs}>
+      {[-1,1].map(side=><group key={side} position={[side*.062,.105,0]}>
+        <mesh position={[0,-.055,0]} castShadow><capsuleGeometry args={[.032,.1,3,6]}/><Material color="#9daea9" metalness={.35} roughness={.4}/></mesh>
+        <mesh position={[0,-.12,.025]} castShadow><boxGeometry args={[.085,.045,.12]}/><Material color="#354e52" metalness={.3} roughness={.4}/></mesh>
+      </group>)}
+    </group>
+    <mesh position={[0,.28,-.115]} castShadow><RoundedBox args={[.15,.18,.09]} radius={.025} smoothness={3}><meshStandardMaterial color="#354b4d" metalness={.45} roughness={.38}/></RoundedBox></mesh>
+    <mesh position={[0,.34,-.17]}><boxGeometry args={[.1,.025,.015]}/><Material color={color} emissive={color} emissiveIntensity={.9}/></mesh>
+    <mesh position={[0,-.025,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.14,.19,16]}/><meshBasicMaterial color={color} transparent opacity={.5}/></mesh>
   </group>;
 }
 function HQ() {
@@ -114,13 +128,13 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
   </group>;
 }
 function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void}) {
-  const ground=useMemo(()=>Array.from({length:19*19},(_,i)=>({x:i%19-9,z:Math.floor(i/19)-9})),[]);
   const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
   const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
   return <group>
     <mesh position={[0,-.32,0]} receiveShadow><cylinderGeometry args={[11.9,12.2,.7,12]}/><Material color="#4c7650" roughness={1}/></mesh>
     <mesh position={[0,-.1,0]} receiveShadow><cylinderGeometry args={[11.5,11.8,.22,12]}/><Material color="#83b76a" roughness={1}/></mesh>
-    {ground.map((t,i)=><mesh key={i} position={[t.x*.58,-.015,t.z*.58]} receiveShadow><boxGeometry args={[.56,.04,.56]}/><Material color={(i%7===0)?"#9bc878":(i%5===0)?"#91c16f":"#85b766"} roughness={1}/></mesh>)}
+    <mesh position={[0,-.015,0]} receiveShadow><boxGeometry args={[17.8,.055,17.8]}/><Material color="#85b766" roughness={1}/></mesh>
+    {Array.from({length:24},(_,i)=>{const a=i*2.399,r=2.1+(i%5)*1.05;return <mesh key={i} position={[Math.cos(a)*r,.015,Math.sin(a)*r]} rotation={[-Math.PI/2,0,a]}><circleGeometry args={[.34+(i%3)*.12,7]}/><Material color={i%3===0?"#9bc878":i%3===1?"#91c16f":"#78a95e"} roughness={1}/></mesh>})}
     <Road from={[0,0]} to={[0,-5.9]} width={.62}/>
     <Road from={[0,0]} to={[0,5.8]} width={.62}/>
     <Road from={[0,0]} to={[-5.9,0]} width={.62}/>
@@ -136,14 +150,14 @@ function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:str
     <Agent start={[-1.5,.05,-1.2]} color="#f3c969" phase={0}/>
     <Agent start={[1.7,.05,1.2]} color="#8ce0b0" phase={2.3}/>
     <Agent start={[-1.2,.05,1.6]} color="#a9a1ff" phase={4.4}/>
-    <ContactShadows position={[0,-.02,0]} opacity={.3} scale={23} blur={2.8} far={6}/>
+    <ContactShadows position={[0,-.02,0]} opacity={.22} scale={19} blur={2.2} far={5}/>
   </group>;
 }
 export default function WorldScene({projects,buildingId,onSelect}:Props) {
-  return <Canvas shadows dpr={[1,1.5]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
+  return <Canvas shadows dpr={[1,1.15]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance"}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
     <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
     <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
-    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
+    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
     <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect}/></Float></Suspense>
     <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={17} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
   </Canvas>;
