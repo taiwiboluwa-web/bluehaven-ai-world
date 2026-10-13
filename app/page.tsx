@@ -51,6 +51,7 @@ export default function Home() {
   const [buildingId, setBuildingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const syncProjects = useWorldStore((state) => state.syncProjects);
 
   async function refreshProjects() {
     try {
@@ -67,6 +68,7 @@ export default function Home() {
   }
 
   useEffect(() => { void refreshProjects(); }, []);
+  useEffect(() => { syncProjects(projects); }, [projects, syncProjects]);
 
   async function createProject() {
     if (!name.trim() || saving) return;
