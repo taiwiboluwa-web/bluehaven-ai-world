@@ -48,7 +48,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { name?: string; purpose?: string; template?: string };
+    const body = await request.json() as { name?: string; purpose?: string; template?: string; gridX?: number; gridZ?: number };
     const name = body.name?.trim();
     const purpose = body.purpose?.trim();
     const template = body.template?.trim() || "Document Question-Answering Agent";
@@ -68,7 +68,19 @@ export async function POST(request: Request) {
     const existing = await sql`SELECT grid_x, grid_z FROM ai_projects WHERE status <> 'offline' ORDER BY created_at`;
     const candidatePlots = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];
     const occupied = new Set(existing.map((row) => `${row.grid_x},${row.grid_z}`));
-    const plot = candidatePlots.find(([x,z]) => !occupied.has(`${x},${z}`));
+    let plot: number[] | undefined;
+    if (typeof body.gridX === "number" || typeof body.gridZ === "number") {
+      const requested = candidatePlots.find(([x, z]) => x === body.gridX && z === body.gridZ);
+      if (!requested) {
+        return NextResponse.json({ error: "Choose a valid village plot from the available map coordinates." }, { status: 400 });
+      }
+      if (occupied.has(`${requested[0]},${requested[1]}`)) {
+        return NextResponse.json({ error: "That plot has already been claimed. Choose another plot or use automatic placement." }, { status: 409 });
+      }
+      plot = requested;
+    } else {
+      plot = candidatePlots.find(([x,z]) => !occupied.has(`${x},${z}`));
+    }
     if (!plot) {
       return NextResponse.json({ error: "The village has no free building plots. Expand the village before adding another project." }, { status: 409 });
     }
