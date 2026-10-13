@@ -29,7 +29,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Add the required values to `.env.local` before creating projects. The schema is already provisioned in the connected Neon database. To set up another database, execute the non-destructive SQL schema from the project migration notes before starting the app.
+Add the required values to `.env.local` before creating projects. The schema is already provisioned in the connected Neon database. To set up another database, run `psql "$DATABASE_URL" -f db/schema.sql` after setting the connection string.
 
 ## Current backend behavior
 
