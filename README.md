@@ -1,5 +1,18 @@
 # BlueHaven AI World
 
+BlueHaven AI World turns AI project operations into a living, isometric village. The visual language takes inspiration from strategy-game village builders (including the general village-building pattern of Clash of Clans), while the product, names, systems, and workflow are designed for BlueHaven's AI workspace.
+
+## Product direction
+
+- **BlueHaven HQ:** executive overview and company operations.
+- **Builder Hut:** project creation, plot assignment, construction feedback, and gateway validation.
+- **Knowledge Archive:** a home for document-grounded agents and future knowledge-base workflows.
+- **AI Infrastructure:** Neon-backed persistence and an OpenAI-compatible model gateway.
+- **Village map:** a 3D overview with project buildings, moving builder units, orbit controls, and visible operational states.
+
+The village is a product interface, not a claim that a project is running just because an animation finished. Project creation is persisted through the API, and activation is gated by server-side gateway/model checks. Keep animation feedback separate from backend truth.
+
+
 BlueHaven AI World is an interactive isometric village for creating and operating AI projects. The village UI is built with Next.js App Router, TypeScript, Three.js, and React Three Fiber. Projects, construction jobs, and audit events persist in Neon Postgres.
 
 ## Stack
