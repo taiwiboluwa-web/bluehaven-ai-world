@@ -114,11 +114,11 @@ function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:str
   </group>;
 }
 export default function WorldScene({projects,buildingId,onSelect}:Props) {
-  return <Canvas shadows dpr={[1,1.5]} camera={{position:[11,11,13],fov:34}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>{gl.setClearColor("#28443d",1);}}>
-    <color attach="background" args={["#28443d"]}/><fog attach="fog" args={["#28443d",23,36]}/>
+  return <Canvas shadows dpr={[1,1.5]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
+    <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
     <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
     <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
     <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect}/></Float></Suspense>
-    <OrbitControls makeDefault enablePan={false} minDistance={10} maxDistance={21} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
+    <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={17} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
   </Canvas>;
 }
