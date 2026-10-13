@@ -23,67 +23,34 @@ function Tile({position,color="#75a957"}:{position:[number,number,number];color?
 }
 function Tree({position,scale=1}:{position:[number,number,number];scale?:number}) {
   return <group position={position} scale={scale}>
-    <mesh position={[0,.32,0]} castShadow><cylinderGeometry args={[.09,.13,.65,7]}/><meshStandardMaterial color="#76513a"/></mesh>
-    <mesh position={[0,.82,0]} castShadow><coneGeometry args={[.43,.95,7]}/><meshStandardMaterial color="#2d784d" roughness={1}/></mesh>
-    <mesh position={[0,1.18,0]} castShadow><coneGeometry args={[.31,.7,7]}/><meshStandardMaterial color="#43945a" roughness={1}/></mesh>
+    <mesh position={[0,.31,0]} castShadow><cylinderGeometry args={[.075,.13,.62,9]}/><meshStandardMaterial color="#6f4a31" roughness={1}/></mesh>
+    <mesh position={[0,.7,0]} castShadow><sphereGeometry args={[.42,12,10]}/><meshStandardMaterial color="#2c6948" roughness={1}/></mesh>
+    <mesh position={[-.2,.91,.04]} castShadow><sphereGeometry args={[.29,10,9]}/><meshStandardMaterial color="#367a4e" roughness={1}/></mesh>
+    <mesh position={[.2,.93,-.04]} castShadow><sphereGeometry args={[.3,10,9]}/><meshStandardMaterial color="#438653" roughness={1}/></mesh>
+    <mesh position={[0,1.13,0]} castShadow><sphereGeometry args={[.29,10,9]}/><meshStandardMaterial color="#4d925b" roughness={1}/></mesh>
   </group>;
 }
 function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:number;scale?:number}) {
-  const colors=["#bd8b51","#a6a1b7","#8b78cb","#d5b55f"];
-  const roofs=["#70443a","#55506e","#6246a0","#8d5a39"];
+  const walls=["#c6a77d","#b7b6a8","#b4a0cf","#d2b977"];
+  const roofs=["#69443a","#4b5960","#59408b","#8b563c"];
+  const trim=["#e4cfaa","#d9d8c8","#d4c7ed","#f0dfa9"];
   return <group position={position} scale={scale}>
-    <mesh position={[0,.38,0]} castShadow receiveShadow><boxGeometry args={[.76,.65,.68]}/><meshStandardMaterial color={colors[kind%4]} roughness={.82}/></mesh>
-    <mesh position={[0,.86,0]} castShadow><coneGeometry args={[.63,.6,4]}/><meshStandardMaterial color={roofs[kind%4]} roughness={.9}/></mesh>
-    <mesh position={[0,.36,.348]}><boxGeometry args={[.19,.36,.025]}/><meshStandardMaterial color="#50372e"/></mesh>
-    <mesh position={[.22,.48,.355]}><boxGeometry args={[.1,.12,.025]}/><meshStandardMaterial color="#ffdc78" emissive="#ffbd51" emissiveIntensity={.3}/></mesh>
-    <mesh position={[0,1.2,0]}><sphereGeometry args={[.09,12,12]}/><meshStandardMaterial color={kind%2?"#a99aff":"#ffdf69"} emissive={kind%2?"#a99aff":"#ffdf69"} emissiveIntensity={.8}/></mesh>
-  </group>;
-}
-function Builder({position}:{position:[number,number,number]}) {
-  const ref=useRef<THREE.Group>(null);
-  useFrame((state)=>{if(ref.current){ref.current.rotation.z=Math.sin(state.clock.elapsedTime*8)*.18;ref.current.position.y=.2+Math.abs(Math.sin(state.clock.elapsedTime*5))*.06;}});
-  return <group ref={ref} position={position}>
-    <mesh position={[0,.24,0]} castShadow><capsuleGeometry args={[.09,.19,4,8]}/><meshStandardMaterial color="#d4a15f"/></mesh>
-    <mesh position={[0,.44,0]} castShadow><sphereGeometry args={[.105,12,12]}/><meshStandardMaterial color="#e9bc86"/></mesh>
-    <mesh position={[0,.54,0]}><coneGeometry args={[.14,.13,5]}/><meshStandardMaterial color="#8d5735"/></mesh>
-    <mesh position={[.16,.3,0]} rotation={[0,0,-.7]}><boxGeometry args={[.05,.25,.05]}/><meshStandardMaterial color="#a36d3e"/></mesh>
-    <mesh position={[.25,.42,0]} rotation={[0,0,.5]}><boxGeometry args={[.055,.18,.055]}/><meshStandardMaterial color="#b9b6c6"/></mesh>
-  </group>;
-}
-function BuilderHut() {
-  return <group position={[-4.65,0,-4.65]}>
-    <mesh position={[0,.08,0]}><cylinderGeometry args={[.62,.7,.12,8]}/><meshStandardMaterial color="#8a7049"/></mesh>
-    <House position={[0,.12,0]} kind={0} scale={.78}/>
-    <mesh position={[.48,.42,.25]} rotation={[0,-.25,0]}><boxGeometry args={[.22,.28,.05]}/><meshStandardMaterial color="#8b633b"/></mesh>
-    <Builder position={[.72,0,.38]}/>
-  </group>;
-}
-function TravellingBuilder({start,target}:{start:[number,number];target:[number,number]}) {
-  const ref=useRef<THREE.Group>(null);
-  const startTime=useRef<number|null>(null);
-  useFrame((state)=>{
-    if(!ref.current) return;
-    if(startTime.current===null) startTime.current=state.clock.elapsedTime;
-    const elapsed=(state.clock.elapsedTime-startTime.current)%7;
-    const outbound=Math.min(1,elapsed/2.25);
-    const returning=Math.max(0,Math.min(1,(elapsed-5.1)/1.7));
-    let x=start[0], z=start[1];
-    if(elapsed<2.25){x=start[0]+(target[0]-start[0])*outbound;z=start[1]+(target[1]-start[1])*outbound;}
-    else if(elapsed<5.1){x=target[0];z=target[1];}
-    else{x=target[0]+(start[0]-target[0])*returning;z=target[1]+(start[1]-target[1])*returning;}
-    ref.current.position.set(x,.015,z);
-    if(elapsed<2.25) ref.current.rotation.y=Math.atan2(target[0]-start[0],target[1]-start[1]);
-    else if(elapsed>=5.1) ref.current.rotation.y=Math.atan2(start[0]-target[0],start[1]-target[1]);
-    ref.current.scale.setScalar(elapsed>=2.25&&elapsed<5.1?1.08:1);
-  });
-  return <group ref={ref}><Builder position={[0,0,0]}/></group>;
-}
-function Hub() {
-  return <group position={[0,0,0]}>
-    <mesh position={[0,.12,0]}><cylinderGeometry args={[1.0,1.13,.2,8]}/><meshStandardMaterial color="#c6a15c" roughness={.8}/></mesh>
-    <House position={[0,.2,0]} kind={3} scale={1.3}/>
-    <mesh position={[0,1.9,0]}><octahedronGeometry args={[.2,1]}/><meshStandardMaterial color="#ffdf69" emissive="#ffb52f" emissiveIntensity={1.5} metalness={.25}/></mesh>
-    <Sparkles count={22} scale={[2.3,2.5,2.3]} size={2} speed={.3} color="#ffdf69"/>
+    <mesh position={[0,.13,0]} castShadow receiveShadow><boxGeometry args={[.9,.16,.82]}/><meshStandardMaterial color="#746d58" roughness={1}/></mesh>
+    <mesh position={[0,.48,0]} castShadow receiveShadow><boxGeometry args={[.76,.62,.68]}/><meshStandardMaterial color={walls[kind%4]} roughness={.92}/></mesh>
+    <mesh position={[0,.84,0]} castShadow><coneGeometry args={[.64,.57,4]}/><meshStandardMaterial color={roofs[kind%4]} roughness={.88}/></mesh>
+    <mesh position={[0,.56,.347]}><boxGeometry args={[.2,.38,.025]}/><meshStandardMaterial color="#563b2b" roughness={.85}/></mesh>
+    <mesh position={[0,.56,.365]}><boxGeometry args={[.15,.31,.018]}/><meshStandardMaterial color="#765039" roughness={.9}/></mesh>
+    <mesh position={[.235,.55,.355]}><boxGeometry args={[.15,.17,.035]}/><meshStandardMaterial color={trim[kind%4]} roughness={.8}/></mesh>
+    <mesh position={[.235,.55,.377]}><boxGeometry args={[.105,.125,.02]}/><meshStandardMaterial color="#6da8b0" emissive="#31545a" emissiveIntensity={.18} roughness={.3}/></mesh>
+    <mesh position={[.235,.55,.39]}><boxGeometry args={[.018,.14,.018]}/><meshStandardMaterial color={trim[kind%4]}/></mesh>
+    <mesh position={[.235,.55,.39]}><boxGeometry args={[.12,.018,.018]}/><meshStandardMaterial color={trim[kind%4]}/></mesh>
+    <mesh position={[-.23,.55,.355]}><boxGeometry args={[.13,.16,.035]}/><meshStandardMaterial color={trim[kind%4]} roughness={.8}/></mesh>
+    <mesh position={[-.23,.55,.377]}><boxGeometry args={[.09,.115,.02]}/><meshStandardMaterial color="#6da8b0" emissive="#31545a" emissiveIntensity={.18} roughness={.3}/></mesh>
+    <mesh position={[-.23,.55,.39]}><boxGeometry args={[.015,.13,.018]}/><meshStandardMaterial color={trim[kind%4]}/></mesh>
+    <mesh position={[-.23,.55,.39]}><boxGeometry args={[.11,.015,.018]}/><meshStandardMaterial color={trim[kind%4]}/></mesh>
+    <mesh position={[.25,1.05,-.16]} castShadow><boxGeometry args={[.14,.42,.15]}/><meshStandardMaterial color="#9b8c78" roughness={1}/></mesh>
+    <mesh position={[.25,1.27,-.16]}><boxGeometry args={[.17,.06,.18]}/><meshStandardMaterial color="#655a4c" roughness={1}/></mesh>
+    <mesh position={[0,1.2,0]}><sphereGeometry args={[.075,12,12]}/><meshStandardMaterial color={kind%2?"#b9a6ff":"#ffdf69"} emissive={kind%2?"#6d55b0":"#ffbd51"} emissiveIntensity={.45}/></mesh>
   </group>;
 }
 function ProjectBuilding({position,project,index,onSelect,building}:{position:[number,number,number];project:Project;index:number;onSelect:(id:string)=>void;building:boolean}) {
