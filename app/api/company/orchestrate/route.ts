@@ -55,8 +55,9 @@ export async function POST(request: Request) {
 
   try {
     const sql = getSql();
-    const found = await sql`SELECT id, name, department, role_description, system_prompt, model_id FROM company_agents WHERE name = ANY(${requestedNames}::text[]) ORDER BY array_position(${requestedNames}::text[], name)`;
-    const agents = found as Agent[];
+    const found = await sql`SELECT id, name, department, role_description, system_prompt, model_id FROM company_agents ORDER BY name`;
+    const roster = found as Agent[];
+    const agents = requestedNames.map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
     if (agents.length !== requestedNames.length) return NextResponse.json({ error: "One or more selected agents are not registered in the company roster." }, { status: 400 });
 
     const atlas = agents.find((a) => a.name === "Atlas") || agents[0];
@@ -66,17 +67,18 @@ export async function POST(request: Request) {
     await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'BlueHaven Orchestrator', 'orchestration.started', 'A multi-agent mission was started.', 'company_task', ${parentId}::uuid, ${JSON.stringify({ goal, agents: agents.map((a) => a.name) })}::jsonb)`;
 
     const results: { agent: string; department: string; taskId: string; status: "completed" | "failed"; output?: string; error?: string; model?: string }[] = [];
-    const context = coordination.output;
+    let sharedContext = coordination.output;
     for (const agent of agents) {
       const taskTitle = (agent.name + " contribution: " + goal).slice(0, 180);
       const taskRows = await sql`INSERT INTO company_tasks (title, description, department_agent_id, created_by, status, priority, started_at) VALUES (${taskTitle}, ${goal + "\n\nCoordination brief:\n" + context}, ${agent.id}, 'BlueHaven Orchestrator', 'in_progress', 'high', now()) RETURNING id`;
       const taskId = String(taskRows[0].id);
       await sql`UPDATE company_agents SET status = 'working', updated_at = now() WHERE id = ${agent.id}`;
       try {
-        const result = await askAgent(agent, goal, context);
+        const result = await askAgent(agent, goal, sharedContext);
         await sql`UPDATE company_tasks SET status = 'completed', result_summary = ${result.output.slice(0, 8000)}, completed_at = now(), updated_at = now() WHERE id = ${taskId}::uuid`;
         await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('agent', ${agent.name}, 'orchestration.contribution.completed', ${agent.name + ' completed a contribution.'}, 'company_task', ${taskId}::uuid, ${JSON.stringify({ model: result.model, parentId })}::jsonb)`;
         results.push({ agent: agent.name, department: agent.department, taskId, status: "completed", output: result.output, model: result.model });
+        sharedContext += `\\n\\n--- ${agent.name} / ${agent.department} contribution ---\\n${result.output.slice(0, 5000)}`;
       } catch (error) {
         const reason = error instanceof Error ? error.message : "Agent execution failed.";
         await sql`UPDATE company_tasks SET status = 'failed', result_summary = ${reason.slice(0, 8000)}, completed_at = now(), updated_at = now() WHERE id = ${taskId}::uuid`;
