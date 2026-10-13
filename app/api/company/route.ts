@@ -51,7 +51,8 @@ export async function POST(request: Request) {
   }
 
   const action = String(body.action || "");
-  if (["create_task", "complete_task", "request_hire"].includes(action) && !authorized(request, "AGENT_SERVICE_TOKEN")) return unauthorized();
+  if (action === "create_task" && !authorized(request, "AGENT_SERVICE_TOKEN") && !authorized(request, "CHO_ADMIN_TOKEN")) return unauthorized();
+  if (["complete_task", "request_hire"].includes(action) && !authorized(request, "AGENT_SERVICE_TOKEN")) return unauthorized();
   if (action === "matthew_review" && !authorized(request, "MATTHEW_SERVICE_TOKEN")) return unauthorized();
   if (action === "cho_decision" && !authorized(request, "CHO_ADMIN_TOKEN")) return unauthorized();
 
