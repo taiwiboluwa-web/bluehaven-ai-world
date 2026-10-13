@@ -230,3 +230,203 @@ h1 em, .wizard-modal h2 em { color: var(--gold); font-family: "Playfair Display"
   .wizard-modal h2 { font-size: 31px; }
   .detail-panel { top: 76px; right: 10px; width: calc(100vw - 20px); max-height: calc(100dvh - 86px); overflow: auto; padding: 19px; }
 }
+
+
+/* BlueHaven AI World — playful strategy-game HUD refinement */
+:root {
+  --bg: #101b22;
+  --panel: #24343a;
+  --panel-raised: #31464a;
+  --line: rgba(255, 236, 181, .22);
+  --line-strong: rgba(255, 226, 151, .42);
+  --text: #fff8e4;
+  --muted: #c0d0b6;
+  --gold: #ffd45c;
+  --green: #9be66e;
+  --blue: #77d9f5;
+}
+body {
+  background: #101b22;
+  background-image: radial-gradient(ellipse at 50% -10%, #35594d 0, #172a30 48%, #101b22 82%);
+}
+.app-shell {
+  max-width: 1840px;
+  padding: 0 clamp(14px, 2.6vw, 42px);
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(91, 151, 80, .12), transparent 42%),
+    linear-gradient(180deg, rgba(20, 40, 42, .96), rgba(12, 24, 30, .99));
+}
+.topbar {
+  position: relative;
+  z-index: 5;
+  min-height: 72px;
+  margin: 0 calc(clamp(14px, 2.6vw, 42px) * -1);
+  padding: 0 clamp(14px, 2.6vw, 42px);
+  border-bottom: 2px solid rgba(255, 220, 118, .34);
+  background: linear-gradient(180deg, #263e42, #192d34);
+  box-shadow: 0 5px 0 rgba(5, 13, 17, .28), 0 12px 30px rgba(0,0,0,.18);
+}
+.brand { letter-spacing: .08em; }
+.brand-mark {
+  border: 2px solid #fff0a7;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #fff29a 0%, #ffc83d 58%, #dc8b23 100%);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.65), 0 3px 0 #9c5a24, 0 5px 15px rgba(255,184,49,.2);
+}
+.company-hq-link {
+  border: 1px solid #9cb78a;
+  border-radius: 8px;
+  background: linear-gradient(#405b50, #2b433e);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 2px 0 #132a2b;
+  color: #f9efc9;
+}
+.profile {
+  border: 2px solid #d8e4bb;
+  background: linear-gradient(145deg, #537b64, #263f3e);
+  box-shadow: 0 2px 0 #142a2b;
+}
+.intro-row {
+  align-items: center;
+  gap: 24px;
+  padding: 22px 0 20px;
+}
+.kicker, .section-tag { color: #c5d9b6; }
+.kicker span { height: 4px; width: 24px; border-radius: 5px; background: #ffd45c; box-shadow: 0 1px 0 #9b6828; }
+h1 {
+  max-width: 620px;
+  margin: 12px 0 10px;
+  font-size: clamp(30px, 3.2vw, 47px);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+  text-shadow: 0 3px 0 rgba(0,0,0,.22);
+}
+h1 em, .wizard-modal h2 em {
+  color: #ffdf6e;
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 800;
+  text-shadow: 0 2px 0 #805522;
+}
+.intro-text { max-width: 490px; color: #c5d4c5; font-size: 12px; line-height: 1.65; }
+.gold-button {
+  margin-top: 14px;
+  padding: 12px 17px;
+  border: 2px solid #fff0a1;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffe77a 0%, #ffc43d 58%, #e99a25 100%);
+  color: #533315;
+  text-shadow: 0 1px 0 rgba(255,255,255,.38);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 #8e5523, 0 9px 18px rgba(0,0,0,.25);
+}
+.gold-button:hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: inset 0 2px 0 rgba(255,255,255,.75), 0 6px 0 #8e5523, 0 13px 22px rgba(0,0,0,.3); }
+.gold-button:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 0 1px 0 #8e5523; }
+.village-stats {
+  min-width: min(50%, 460px);
+  border: 2px solid #9cae81;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(44, 67, 61, .96), rgba(25, 44, 43, .96));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.09), 0 4px 0 rgba(7,19,21,.55), 0 12px 25px rgba(0,0,0,.2);
+}
+.village-stats div { min-height: 91px; padding: 14px 13px; gap: 7px; }
+.village-stats div + div { border-left: 1px solid rgba(255,235,170,.22); }
+.village-stats strong { color: #fff3bd; font-size: clamp(24px, 2.2vw, 31px); text-shadow: 0 2px 0 rgba(0,0,0,.3); }
+.village-stats span { color: #c6d8b4; font-size: 7px; }
+.world-section { padding-top: 16px; border-top: 1px solid rgba(255,224,133,.18); }
+.world-heading { align-items: center; margin-bottom: 10px; }
+.world-heading h2, .project-heading h2 { margin-top: 4px; font-size: clamp(21px, 2vw, 27px); letter-spacing: -.035em; }
+.world-legend { gap: 14px; color: #c9d8c7; }
+.legend-green, .legend-gold { width: 9px; height: 9px; box-shadow: 0 0 0 2px rgba(255,255,255,.08), 0 0 10px currentColor; }
+.scene-wrap {
+  height: clamp(420px, 54vw, 690px);
+  margin-top: 0;
+  border: 3px solid #8fae7a;
+  border-radius: 15px;
+  background: radial-gradient(ellipse at 50% 35%, #80b969 0%, #3f7953 48%, #1d4641 78%, #173339 100%);
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.18), 0 4px 0 #162d2d, 0 18px 45px rgba(0,0,0,.34);
+}
+.scene-wrap:before {
+  background: linear-gradient(180deg, rgba(229,255,180,.035) 0%, transparent 56%, rgba(6,20,20,.27) 100%);
+}
+.scene-wrap:after { inset: 8px; border: 1px solid rgba(255,255,213,.14); border-radius: 9px; }
+.map-compass {
+  top: 20px; right: 20px; width: 42px; height: 48px;
+  border: 2px solid #c2d6a3; border-radius: 9px;
+  background: linear-gradient(180deg, rgba(47,78,66,.92), rgba(22,48,44,.94));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 3px 0 rgba(6,23,22,.4);
+}
+.scene-bottom {
+  bottom: 16px; left: 18px; right: 18px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,239,175,.25);
+  border-radius: 8px;
+  background: rgba(14, 34, 31, .72);
+  color: #e6f0d4;
+  backdrop-filter: blur(8px);
+}
+.scene-bottom span:first-child { color: #ffdf6e; }
+.projects-section { padding: 32px 0 48px; }
+.project-heading { margin-bottom: 14px; }
+.project-list {
+  border: 2px solid #526f5a;
+  border-radius: 12px;
+  background: rgba(21, 41, 39, .86);
+  box-shadow: 0 4px 0 rgba(5,17,20,.42);
+}
+.project-row { min-height: 74px; border-bottom-color: rgba(211,231,181,.12); }
+.project-row:hover, .project-row.is-selected { background: linear-gradient(90deg, rgba(132,194,92,.15), rgba(255,212,92,.055)); }
+.project-glyph {
+  border: 2px solid #d3bd6e;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #5e6f4d, #293f3a);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 2px 0 #172c2a;
+}
+.project-main strong { color: #fff6d7; }
+.project-main small { color: #bdcebd; }
+.status-pill { border-radius: 7px; background: rgba(40,76,52,.55); }
+.status-pill.building { background: rgba(104,75,30,.32); }
+.status-pill.failed { background: rgba(112,39,36,.3); }
+.text-button, .detail-action {
+  border: 1px solid #9ab387;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #405c4d, #293f3a);
+  color: #fff0b5;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 3px 0 #152c2b;
+}
+.text-button:hover, .detail-action:hover { background: linear-gradient(180deg, #527451, #304d40); border-color: #e2d38a; }
+.footer { border-top-color: rgba(255,224,133,.2); color: #9eb6a2; }
+.wizard-modal, .detail-panel {
+  border: 2px solid #7f9a70;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(39,61,55,.98), rgba(19,35,36,.99));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 5px 0 rgba(5,17,19,.6), 0 28px 90px rgba(0,0,0,.58);
+}
+.wizard-modal input, .wizard-modal textarea, .wizard-modal select {
+  border-color: #536f5c;
+  border-radius: 8px;
+  background: #132623;
+}
+.wizard-note { border-color: rgba(255,220,107,.25); border-radius: 9px; background: rgba(255,212,92,.07); }
+.close-button { border-radius: 8px; background: #2c4540; }
+.detail-panel { border-color: #a0b782; }
+@media (max-width: 1050px) {
+  .intro-row { flex-direction: row; align-items: center; gap: 20px; }
+  .village-stats { min-width: 47%; }
+  .village-stats div { min-height: 84px; }
+}
+@media (max-width: 760px) {
+  .intro-row { align-items: flex-start; flex-direction: column; gap: 20px; padding: 24px 0 18px; }
+  .village-stats { width: 100%; max-width: none; min-width: 0; }
+  .world-heading { align-items: flex-start; }
+  .scene-wrap { height: 430px; }
+}
+@media (max-width: 520px) {
+  .topbar { min-height: 62px; }
+  .intro-row { padding: 21px 0 17px; }
+  h1 { font-size: clamp(31px, 9vw, 43px); }
+  .village-stats div { min-height: 77px; padding: 10px 8px; }
+  .village-stats span { font-size: 6px; }
+  .world-heading h2, .project-heading h2 { font-size: 23px; }
+  .scene-wrap { height: 390px; }
+  .scene-bottom { left: 12px; right: 12px; padding: 8px; }
+  .project-row { min-height: 66px; }
+}
