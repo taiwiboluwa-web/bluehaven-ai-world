@@ -80,7 +80,7 @@ function Village({projects,buildingId,onSelect}:{projects:Project[];buildingId:s
   const grass=useMemo(()=>Array.from({length:144},(_,i)=>({x:(i%12)-5.5,z:Math.floor(i/12)-5.5})),[]);
   const forest=useMemo(()=>Array.from({length:60},(_,i)=>({x:Math.cos(i*2.4)*(6.3+(i%3)*.4),z:Math.sin(i*2.4)*(5.9+(i%4)*.3),s:.65+(i%5)*.09})),[]);
   return <group rotation={[0,-.12,0]}>
-    {grass.map((t,i)=><Tile key={i} position={[t.x*.94,-.08,t.z*.94} color={(Math.floor(t.x+t.z)%4===0)?"#83b760":(Math.floor(t.x-t.z)%5===0)?"#78ad54":"#8abd63"}/>)}
+    {grass.map((t,i)=><Tile key={i} position={[t.x*.94,-.08,t.z*.94]} color={(Math.floor(t.x+t.z)%4===0)?"#83b760":(Math.floor(t.x-t.z)%5===0)?"#78ad54":"#8abd63"}/>)}
     {grass.filter(t=>Math.abs(t.x)<4.4&&Math.abs(t.z)<4.4&&Math.abs(t.x-t.z)<1).map((t,i)=><mesh key={"path"+i} position={[t.x*.94,-.012,t.z*.94]}><boxGeometry args={[.22,.015,.22]}/><meshStandardMaterial color="#b6a77e" roughness={1}/></mesh>)}
     {forest.map((t,i)=><Tree key={i} position={[t.x,-.02,t.z]} scale={t.s}/>)}
     <Hub/>
