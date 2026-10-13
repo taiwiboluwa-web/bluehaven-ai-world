@@ -105,11 +105,13 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
 }
 function Village({projects,buildingId,onSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void}) {
   const grass=useMemo(()=>Array.from({length:144},(_,i)=>({x:(i%12)-5.5,z:Math.floor(i/12)-5.5})),[]);
-  const forest=useMemo(()=>Array.from({length:60},(_,i)=>({x:Math.cos(i*2.4)*(6.3+(i%3)*.4),z:Math.sin(i*2.4)*(5.9+(i%4)*.3),s:.65+(i%5)*.09})),[]);\n  const constructionProject=projects.find((project)=>project.id===buildingId);
+  const forest=useMemo(()=>Array.from({length:60},(_,i)=>({x:Math.cos(i*2.4)*(6.3+(i%3)*.4),z:Math.sin(i*2.4)*(5.9+(i%4)*.3),s:.65+(i%5)*.09})),[]);
+  const constructionProject=projects.find((project)=>project.id===buildingId);
   return <group rotation={[0,-.12,0]}>
     {grass.map((t,i)=><Tile key={i} position={[t.x*.94,-.08,t.z*.94]} color={(Math.floor(t.x+t.z)%4===0)?"#83b760":(Math.floor(t.x-t.z)%5===0)?"#78ad54":"#8abd63"}/>)}
     {grass.filter(t=>Math.abs(t.x)<4.4&&Math.abs(t.z)<4.4&&Math.abs(t.x-t.z)<1).map((t,i)=><mesh key={"path"+i} position={[t.x*.94,-.012,t.z*.94]}><boxGeometry args={[.22,.015,.22]}/><meshStandardMaterial color="#b6a77e" roughness={1}/></mesh>)}
     {forest.map((t,i)=><Tree key={i} position={[t.x,-.02,t.z]} scale={t.s}/>)}
+    <BuilderHut/>
     <Hub/>
     {projects.map((p,i)=>{
       const plot=fallbackPlots[i%fallbackPlots.length];
@@ -118,6 +120,7 @@ function Village({projects,buildingId,onSelect}:{projects:Project[];buildingId:s
       const building=p.id===buildingId||["under_construction","initializing"].includes(p.status);
       return <ProjectBuilding key={p.id} position={[x,.02,z]} project={p} index={i} onSelect={onSelect} building={building}/>;
     })}
+    {constructionProject && <TravellingBuilder key={constructionProject.id} start={[-4.65,-4.65]} target={[constructionProject.gridX ?? 0,constructionProject.gridZ ?? 0]}/>}
     <ContactShadows position={[0,-.005,0]} opacity={.32} scale={14} blur={2.5} far={4}/>
   </group>;
 }
