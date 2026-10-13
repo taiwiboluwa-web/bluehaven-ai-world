@@ -60,7 +60,8 @@ export async function POST(request: Request) {
     const agents = requestedNames.map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
     if (agents.length !== requestedNames.length) return NextResponse.json({ error: "One or more selected agents are not registered in the company roster." }, { status: 400 });
 
-    const atlas = agents.find((a) => a.name === "Atlas") || agents[0];
+    const atlas = roster.find((a) => a.name === "Atlas");
+    if (!atlas) return NextResponse.json({ error: "Atlas is missing from the company roster, so coordination cannot start." }, { status: 503 });
     const coordination = await askAgent(atlas, goal, "Act as the coordination lead. Create a short execution brief: desired outcome, workstreams, dependencies, quality criteria, and risks. Do not do the other departments' work.");
     const parentRows = await sql`INSERT INTO company_tasks (title, description, department_agent_id, created_by, status, priority, started_at) VALUES (${("Collaborative mission: " + goal).slice(0,180)}, ${goal}, ${atlas.id}, 'CHO / Orchestrator', 'in_progress', 'high', now()) RETURNING id, title`;
     const parentId = String(parentRows[0].id);
