@@ -93,7 +93,7 @@ export default function Home() {
           setBuildingId((current) => current === created.id ? null : current);
           await refreshProjects();
         }
-      }, 6500);
+      }, 7000);
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "Project creation failed.");
     } finally {
