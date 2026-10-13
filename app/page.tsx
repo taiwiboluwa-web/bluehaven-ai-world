@@ -106,6 +106,21 @@ export default function Home() {
     }
   }
 
+  async function reactivateOfflineProjects() {
+    setActionError("");
+    setLoading(true);
+    try {
+      const response = await fetch("/api/projects/reactivate", { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not bring offline projects back online.");
+      await refreshProjects();
+      setActionError(data.reactivated === 0 ? "There are no offline projects to reactivate." : "");
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Could not reactivate offline projects.");
+      setLoading(false);
+    }
+  }
+
   async function projectAction(id: string, action: "pause" | "resume" | "stop") {
     setActionError("");
     try {
@@ -131,7 +146,7 @@ export default function Home() {
       {loadError && <div className="service-alert" role="alert"><strong>Village connection issue</strong><span>{loadError}</span><button onClick={() => { setLoading(true); void refreshProjects(); }}>Retry</button></div>}
       {actionError && <div className="service-alert" role="alert"><strong>Action needs attention</strong><span>{actionError}</span><button onClick={() => setActionError("")}>Dismiss</button></div>}
       <div className="scene-wrap"><WorldScene projects={projects} buildingId={buildingId} onSelect={setSelected}/><div className="village-ribbon"><span className="ribbon-level">01</span><span><b>BLUEHAVEN VILLAGE</b><small>{projects.length} BUILT PLOTS · SHARED WORLD</small></span><span className="ribbon-live"><i/> {loading ? "SYNCING" : "LIVE"}</span></div><div className="village-rail" aria-label="Village controls"><button title="Build a project" aria-label="Build a project" onClick={() => { setActionError(""); setShowWizard(true); }}><b>＋</b><small>BUILD</small></button><button title="View project roster" aria-label="View project roster" onClick={() => document.getElementById("project-operations")?.scrollIntoView({behavior:"smooth"})}><b>⌂</b><small>ROSTER</small></button><button title="Refresh village" aria-label="Refresh village" onClick={() => { setLoading(true); void refreshProjects(); }}><b>↻</b><small>SYNC</small></button></div><div className="builder-tip"><span className="builder-avatar">B</span><span><b>BUILDER</b><small>{buildingId ? "CONSTRUCTION IN PROGRESS" : "READY FOR ORDERS"}</small></span><i className={buildingId ? "builder-working" : ""}/></div><div className="map-compass">N<br/><span>＋</span></div><div className="scene-bottom"><span>BH / WORLD 001</span><span>PROJECT DISTRICT</span><span>{loading ? "SYNCING WORLD…" : "DRAG TO ROTATE · SCROLL TO ZOOM"}</span></div></div></section>
-    <section className="projects-section" id="project-operations"><div className="project-heading"><div><span className="section-tag">02 / PROJECT OPERATIONS</span><h2>Projects <span>{projects.length.toString().padStart(2,"0")}</span></h2></div><button className="text-button" onClick={() => setShowWizard(true)}>＋ New building</button></div>
+    <section className="projects-section" id="project-operations"><div className="project-heading"><div><span className="section-tag">02 / PROJECT OPERATIONS</span><h2>Projects <span>{projects.length.toString().padStart(2,"0")}</span></h2></div><div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button className="text-button" onClick={() => void reactivateOfflineProjects()} disabled={loading || !projects.some((p) => p.status === "offline")}>↻ Bring all offline online ({projects.filter((p) => p.status === "offline").length})</button><button className="text-button" onClick={() => setShowWizard(true)}>＋ New building</button></div></div>
       <div className="project-list">{!loading && projects.length === 0 && !loadError && <div className="empty-ledger"><strong>Your village is ready for its first build.</strong><span>Create a project to reserve a plot and save its building to Neon.</span><button className="text-button" onClick={() => setShowWizard(true)}>＋ Build your first project</button></div>}
       {projects.map((p) => <button className={`project-row ${selected === p.id ? "is-selected" : ""}`} key={p.id} onClick={() => setSelected(p.id)}><span className={`project-glyph ${p.tone}`}>{p.kind.includes("DOCUMENT") ? "▤" : p.kind.includes("WEB") ? "⌖" : "✳"}</span><span className="project-main"><strong>{p.name}</strong><small>{p.description}</small></span><span className="project-kind">{p.kind}</span><span className={`status-pill ${p.status === "under_construction" || p.status === "initializing" ? "building" : p.status === "active" || p.status === "processing" ? "active" : p.status === "failed" ? "failed" : "idle"}`}><i />{statusLabel(p.status)}</span><span className="row-arrow">↗</span></button>)}</div></section>
     <footer className="footer"><span>BLUEHAVEN STUDIOS</span><span>CREATIVITY BEYOND LIMITS</span><span>THE WORLD GROWS WITH YOU.</span></footer>
