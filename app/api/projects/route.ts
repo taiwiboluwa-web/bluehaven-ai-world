@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     const sql = getSql();
-    const existing = await sql`SELECT grid_x, grid_z FROM ai_projects WHERE status <> 'offline' ORDER BY created_at`;
+    const existing = await sql`SELECT grid_x, grid_z FROM ai_projects ORDER BY created_at`;
     const candidatePlots = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];
     const occupied = new Set(existing.map((row) => `${row.grid_x},${row.grid_z}`));
     let plot: number[] | undefined;
