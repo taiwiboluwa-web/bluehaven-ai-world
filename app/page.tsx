@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import WorldScene from "@/components/WorldScene";
+import dynamic from "next/dynamic";
+
+const WorldScene = dynamic(() => import("@/components/WorldScene"), {
+  ssr: false,
+  loading: () => <div className="scene-loading" role="status">Preparing your village…</div>,
+});
 
 type Project = {
   id: string;
