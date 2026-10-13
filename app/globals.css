@@ -430,3 +430,75 @@ h1 em, .wizard-modal h2 em {
   .scene-bottom { left: 12px; right: 12px; padding: 8px; }
   .project-row { min-height: 66px; }
 }
+
+
+/* Village HUD: tactile strategy-game interface, while keeping the 3D world dominant. */
+.intro-row { padding: 18px 0 18px; align-items: center; }
+h1 { font-size: clamp(31px, 3.5vw, 48px); margin: 10px 0 8px; }
+.intro-text { max-width: 500px; font-size: 12px; line-height: 1.6; }
+.world-section { padding-top: 13px; }
+.world-heading { margin-bottom: 12px; }
+.scene-wrap { height: clamp(480px, 59vw, 760px); border-width: 3px; border-color: #89a96c; }
+.village-ribbon {
+  position: absolute; z-index: 4; top: 18px; left: 18px; display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px 8px 8px; border: 2px solid #9eb881; border-radius: 10px;
+  color: #fff3c2; background: linear-gradient(180deg, rgba(50,77,57,.96), rgba(25,48,40,.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 3px 0 rgba(11,28,24,.7), 0 8px 22px rgba(0,0,0,.25);
+}
+.ribbon-level {
+  display: grid; place-items: center; width: 38px; height: 38px; border: 2px solid #fff0a0; border-radius: 9px;
+  color: #543719; font-size: 19px; font-weight: 900; background: linear-gradient(#fff18b,#e7a72c);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.65), 0 2px 0 #8e5925;
+}
+.village-ribbon b, .builder-tip b { display: block; font: 800 10px var(--sans); letter-spacing: .08em; }
+.village-ribbon small, .builder-tip small { display: block; margin-top: 4px; color: #c3d7b2; font: 8px var(--mono); letter-spacing: .035em; }
+.ribbon-live { display: flex; align-items: center; gap: 6px; margin-left: 7px; color: #c9f59b; font: 8px var(--mono); }
+.ribbon-live i, .builder-tip > i { width: 7px; height: 7px; border-radius: 50%; background: #9be66e; box-shadow: 0 0 9px rgba(155,230,110,.7); }
+.village-rail {
+  position: absolute; z-index: 4; left: 18px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 9px;
+}
+.village-rail button {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 62px; height: 63px;
+  border: 2px solid #c6d9a5; border-radius: 11px; color: #fff0b8;
+  background: linear-gradient(180deg, #527653, #2b4c3c); box-shadow: inset 0 2px 0 rgba(255,255,255,.18), 0 4px 0 #19382d, 0 8px 16px rgba(0,0,0,.25);
+  transition: transform .16s, filter .16s;
+}
+.village-rail button:hover { transform: translateY(-2px) scale(1.035); filter: brightness(1.13); }
+.village-rail button:active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(255,255,255,.15), 0 1px 0 #19382d; }
+.village-rail button b { font-size: 23px; line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.village-rail button small { font: 800 8px var(--mono); letter-spacing: .06em; }
+.builder-tip {
+  position: absolute; z-index: 4; right: 18px; bottom: 65px; display: flex; align-items: center; gap: 10px;
+  padding: 10px 13px 10px 9px; border: 2px solid #9db881; border-radius: 10px;
+  background: linear-gradient(180deg, rgba(50,76,55,.96), rgba(25,47,39,.97));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 3px 0 rgba(10,26,21,.65), 0 8px 22px rgba(0,0,0,.22);
+}
+.builder-avatar { display: grid; place-items: center; width: 36px; height: 36px; border: 2px solid #fff0a0; border-radius: 9px; background: linear-gradient(145deg,#ffe77a,#dc9b2a); color: #583a1a; font-weight: 900; font-size: 17px; box-shadow: 0 2px 0 #86551f; }
+.builder-tip > i { margin-left: 8px; background: #a9c2a0; box-shadow: none; }
+.builder-tip > i.builder-working { background: #ffd45c; box-shadow: 0 0 10px rgba(255,212,92,.7); animation: builder-pulse 1s ease-in-out infinite alternate; }
+@keyframes builder-pulse { from { opacity: .45; transform: scale(.8); } to { opacity: 1; transform: scale(1.2); } }
+.scene-bottom { left: 18px; right: 18px; }
+.projects-section { padding-top: 30px; }
+@media (max-width: 760px) {
+  .scene-wrap { height: 500px; }
+  .village-ribbon { top: 12px; left: 12px; gap: 7px; padding: 6px 8px 6px 6px; }
+  .ribbon-level { width: 32px; height: 32px; font-size: 16px; }
+  .village-ribbon b { font-size: 8px; }
+  .village-ribbon small { font-size: 7px; }
+  .ribbon-live { margin-left: 0; }
+  .village-rail { left: 12px; gap: 7px; }
+  .village-rail button { width: 49px; height: 53px; border-radius: 9px; }
+  .village-rail button b { font-size: 19px; }
+  .village-rail button small { font-size: 7px; }
+  .builder-tip { right: 12px; bottom: 56px; gap: 7px; padding: 7px 9px 7px 7px; }
+  .builder-avatar { width: 31px; height: 31px; }
+  .builder-tip b { font-size: 8px; }
+  .builder-tip small { font-size: 7px; }
+  .scene-bottom { left: 12px; right: 12px; }
+}
+@media (max-width: 420px) {
+  .village-ribbon { max-width: calc(100% - 75px); }
+  .ribbon-live { display: none; }
+  .builder-tip { right: 10px; bottom: 54px; }
+  .scene-wrap { height: 470px; }
+}
