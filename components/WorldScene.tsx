@@ -79,7 +79,8 @@ function Agent({start,color,phase=0,destination,obstacles}:{start:[number,number
   const limbs=useRef<THREE.Group>(null);
   const route=useMemo(() => {
     const grid = new PF.Grid(19, 19);
-    for (let x = 8; x <= 10; x++) for (let z = 8; z <= 10; z++) grid.setWalkableAt(x, z, false);\n    for (const [x, z] of obstacles) grid.setWalkableAt(Math.max(0, Math.min(18, Math.round(x + 9))), Math.max(0, Math.min(18, Math.round(z + 9))), false);
+    for (let x = 8; x <= 10; x++) for (let z = 8; z <= 10; z++) grid.setWalkableAt(x, z, false);
+    for (const [x, z] of obstacles) grid.setWalkableAt(Math.max(0, Math.min(18, Math.round(x + 9))), Math.max(0, Math.min(18, Math.round(z + 9))), false);
     const from = [Math.max(0, Math.min(18, Math.round(start[0] + 9))), Math.max(0, Math.min(18, Math.round(start[2] + 9)))];
     const to = [Math.max(0, Math.min(18, Math.round(destination[0] + 9))), Math.max(0, Math.min(18, Math.round(destination[1] + 9)))];
     grid.setWalkableAt(from[0], from[1], true);
@@ -165,7 +166,8 @@ function DistrictBuilding({position,kind,label,onSelect}:{position:[number,numbe
 }
 function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
   const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
-  const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));\n  const obstacles=useMemo<[number,number][]>(()=>[...projects.map((p,i)=>[typeof p.gridX==="number"?p.gridX:plots[i%plots.length][0],typeof p.gridZ==="number"?p.gridZ:plots[i%plots.length][1]] as [number,number]),[0,0],[0,-6.05],[-6.05,0],[6.05,0]], [projects]);
+  const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
+  const obstacles=useMemo<[number,number][]>(()=>[...projects.map((p,i)=>[typeof p.gridX==="number"?p.gridX:plots[i%plots.length][0],typeof p.gridZ==="number"?p.gridZ:plots[i%plots.length][1]] as [number,number]),[0,0],[0,-6.05],[-6.05,0],[6.05,0]], [projects]);
   return <group>
     <mesh position={[0,-.32,0]} receiveShadow><cylinderGeometry args={[11.9,12.2,.7,12]}/><Material color="#4c7650" roughness={1}/></mesh>
     <mesh position={[0,-.1,0]} receiveShadow><cylinderGeometry args={[11.5,11.8,.22,12]}/><Material color="#83b76a" roughness={1}/></mesh>
@@ -180,12 +182,15 @@ function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project
     <Road from={[-3.4,2.4]} to={[0,0]} width={.48}/>
     <Road from={[3.25,2.45]} to={[0,0]} width={.48}/>
     {forest.map((t,i)=><Tree key={i} position={[t.x,-.02,t.z]} scale={t.s} autumn={i%7===0}/>)}
-    <HQ onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[0,0,-6.05]} kind={3} label="Builder Hut" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[-6.05,0,0]} kind={2} label="Knowledge Archive" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[6.05,0,0]} kind={4} label="AI Infrastructure" onSelect={onDistrictSelect}/>
+    <HQ onSelect={onDistrictSelect}/>
+    <DistrictBuilding position={[0,0,-6.05]} kind={3} label="Builder Hut" onSelect={onDistrictSelect}/>
+    <DistrictBuilding position={[-6.05,0,0]} kind={2} label="Knowledge Archive" onSelect={onDistrictSelect}/>
+    <DistrictBuilding position={[6.05,0,0]} kind={4} label="AI Infrastructure" onSelect={onDistrictSelect}/>
     {occupied.map(({p,i,plot})=>{const x=typeof p.gridX==="number"?p.gridX:plot[0];const z=typeof p.gridZ==="number"?p.gridZ:plot[1];const building=p.id===buildingId||["under_construction","initializing"].includes(p.status);return <ProjectBuilding key={p.id} position={[x,.02,z]} project={p} index={i} onSelect={onSelect} building={building}/>;})}
     {[[ -5.7,-5.3], [5.65,-5.4],[-5.7,5.3],[5.65,5.4]].map((p,i)=><group key={i} position={[p[0],0,p[1]]}><mesh position={[0,.3,0]} castShadow><cylinderGeometry args={[.12,.16,.6,8]}/><Material color="#b9a16d" metalness={.35}/></mesh><mesh position={[0,.65,0]}><sphereGeometry args={[.13,12,10]}/><Material color="#ffe6a0" emissive="#ffcf62" emissiveIntensity={1.2}/></mesh><pointLight position={[0,.75,0]} color="#ffd887" intensity={.45} distance={2}/></group>)}
-    <Agent start={[-1.5,.05,-1.2]} color="#f3c969" phase={0}/>
-    <Agent start={[1.7,.05,1.2]} color="#8ce0b0" phase={2.3}/>
-    <Agent start={[-1.2,.05,1.6]} color="#a9a1ff" phase={4.4}/>
+    <Agent start={[-1.5,.05,-1.2]} destination={[-3.9,-2.3]} obstacles={obstacles} color="#f3c969" phase={0}/>
+    <Agent start={[1.7,.05,1.2]} destination={[3.8,-2.5]} obstacles={obstacles} color="#8ce0b0" phase={2.3}/>
+    <Agent start={[-1.2,.05,1.6]} destination={[-4.1,2.4]} obstacles={obstacles} color="#a9a1ff" phase={4.4}/>
     <ContactShadows position={[0,-.02,0]} opacity={.22} scale={19} blur={2.2} far={5}/>
   </group>;
 }
