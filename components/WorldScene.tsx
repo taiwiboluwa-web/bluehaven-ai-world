@@ -151,7 +151,19 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
     {building?<><mesh position={[0,.72,0]} castShadow><boxGeometry args={[1,1.05,1]}/><meshStandardMaterial color="#e7c982" wireframe transparent opacity={.55}/></mesh><mesh position={[0,1.27,0]}><boxGeometry args={[1.12,.07,1.12]}/><Material color="#d2a85c"/></mesh><Sparkles count={20} scale={1.55} size={2.4} speed={.8} color="#ffdf79"/></>:<><House position={[0,.14,0]} kind={index+1} scale={.82}/><mesh position={[0,1.57,0]}><sphereGeometry args={[.065,12,12]}/><meshBasicMaterial color={tone}/></mesh><Sparkles count={project.status==="active"?7:3} scale={[.8,.3,.8]} position={[0,1.45,0]} size={1.6} speed={.22} color={tone}/></>}
   </group>;
 }
-function DistrictBuilding({position,kind,label,onSelect}:{position:[number,number,number];kind:number;label:string;onSelect:(id:DistrictId)=>void}) {\n  const id=label==="Builder Hut"?"builder":label==="Knowledge Archive"?"archive":label==="AI Infrastructure"?"infrastructure":"hq";\n  const accent=id==="builder"?"#b9ed91":id==="archive"?"#c5b5ff":id==="infrastructure"?"#91dff1":"#ffdf78";\n  return <group position={position} onClick={(e)=>{e.stopPropagation();onSelect(id as DistrictId);}} onPointerOver={(e)=>{e.stopPropagation();document.body.style.cursor="pointer";}} onPointerOut={()=>{document.body.style.cursor="auto";}}>\n    <mesh position={[0,.055,0]} receiveShadow><cylinderGeometry args={[1.02,1.12,.13,8]}/><Material color="#9b9b77"/></mesh>\n    <mesh position={[0,.13,0]}><ringGeometry args={[.86,.96,8]}/><meshBasicMaterial color={accent} transparent opacity={.9}/></mesh>\n    <House position={[0,.1,0]} kind={kind} scale={.9}/>\n    <mesh position={[0,1.88,.03]}><boxGeometry args={[.92,.23,.07]}/><Material color="#24452f" metalness={.2}/></mesh>\n    <mesh position={[0,1.88,.073]}><boxGeometry args={[.76,.035,.012]}/><Material color={accent} emissive={accent} emissiveIntensity={.8}/></mesh>\n    <Sparkles count={7} position={[0,1.7,0]} scale={[1.15,.5,1.15]} size={1.7} speed={.25} color={accent}/>\n  </group>;\n}\nfunction World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
+function DistrictBuilding({position,kind,label,onSelect}:{position:[number,number,number];kind:number;label:string;onSelect:(id:DistrictId)=>void}) {
+  const id=label==="Builder Hut"?"builder":label==="Knowledge Archive"?"archive":label==="AI Infrastructure"?"infrastructure":"hq";
+  const accent=id==="builder"?"#b9ed91":id==="archive"?"#c5b5ff":id==="infrastructure"?"#91dff1":"#ffdf78";
+  return <group position={position} onClick={(e)=>{e.stopPropagation();onSelect(id as DistrictId);}} onPointerOver={(e)=>{e.stopPropagation();document.body.style.cursor="pointer";}} onPointerOut={()=>{document.body.style.cursor="auto";}}>
+    <mesh position={[0,.055,0]} receiveShadow><cylinderGeometry args={[1.02,1.12,.13,8]}/><Material color="#9b9b77"/></mesh>
+    <mesh position={[0,.13,0]}><ringGeometry args={[.86,.96,8]}/><meshBasicMaterial color={accent} transparent opacity={.9}/></mesh>
+    <House position={[0,.1,0]} kind={kind} scale={.9}/>
+    <mesh position={[0,1.88,.03]}><boxGeometry args={[.92,.23,.07]}/><Material color="#24452f" metalness={.2}/></mesh>
+    <mesh position={[0,1.88,.073]}><boxGeometry args={[.76,.035,.012]}/><Material color={accent} emissive={accent} emissiveIntensity={.8}/></mesh>
+    <Sparkles count={7} position={[0,1.7,0]} scale={[1.15,.5,1.15]} size={1.7} speed={.25} color={accent}/>
+  </group>;
+}
+function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
   const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
   const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
   return <group>
