@@ -15,7 +15,9 @@
     "next": "^15.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "three": "^0.179.1"
+    "three": "^0.179.1",
+    "pathfinding": "^0.4.18",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
@@ -24,6 +26,7 @@
     "@types/three": "^0.179.0",
     "eslint": "^9.31.0",
     "eslint-config-next": "^15.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@types/pathfinding": "^0.1.4"
   }
 }
