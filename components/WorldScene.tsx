@@ -74,10 +74,32 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
     <Block p={[0,.11,.73]} s={[.38,.07,.16]} color="#b8a581" r={.02}/>
   </group>;
 }
-function Agent({start,color,phase=0}:{start:[number,number,number];color:string;phase?:number}) {
+function Agent({start,color,phase=0,destination}:{start:[number,number,number];color:string;phase?:number;destination:[number,number]}) {
   const ref=useRef<THREE.Group>(null);
   const limbs=useRef<THREE.Group>(null);
-  useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime*.42+phase;ref.current.position.x=start[0]+Math.sin(t)*.72;ref.current.position.z=start[2]+Math.cos(t*1.13)*.62;ref.current.position.y=start[1]+.035+Math.abs(Math.sin(t*3))*.035;ref.current.rotation.y=-t*.8;if(limbs.current)limbs.current.rotation.x=Math.sin(t*5)*.08;}});
+  const route=useMemo(() => {
+    const grid = new PF.Grid(19, 19);
+    for (let x = 8; x <= 10; x++) for (let z = 8; z <= 10; z++) grid.setWalkableAt(x, z, false);
+    const from = [Math.max(0, Math.min(18, Math.round(start[0] + 9))), Math.max(0, Math.min(18, Math.round(start[2] + 9)))];
+    const to = [Math.max(0, Math.min(18, Math.round(destination[0] + 9))), Math.max(0, Math.min(18, Math.round(destination[1] + 9)))];
+    grid.setWalkableAt(from[0], from[1], true);
+    grid.setWalkableAt(to[0], to[1], true);
+    const path = new PF.AStarFinder({ allowDiagonal: true, dontCrossCorners: true }).findPath(from[0], from[1], to[0], to[1], grid);
+    return path.length > 1 ? path.map(([x, z]) => [x - 9, z - 9] as [number, number]) : [[start[0], start[2]], [destination[0], destination[1]]];
+  }, [start, destination]);
+  useFrame(({ clock }, delta) => {
+    if (!ref.current) return;
+    const travel = (clock.elapsedTime * .72 + phase) % Math.max(1, route.length - 1);
+    const index = Math.floor(travel);
+    const blend = travel - index;
+    const from = route[index] || route[0];
+    const to = route[Math.min(index + 1, route.length - 1)] || from;
+    ref.current.position.x = THREE.MathUtils.damp(ref.current.position.x, from[0] + (to[0] - from[0]) * blend, 5, delta);
+    ref.current.position.z = THREE.MathUtils.damp(ref.current.position.z, from[1] + (to[1] - from[1]) * blend, 5, delta);
+    ref.current.position.y = start[1] + .035 + Math.abs(Math.sin(clock.elapsedTime * 5)) * .035;
+    ref.current.rotation.y = Math.atan2(to[0] - from[0], to[1] - from[1]);
+    if (limbs.current) limbs.current.rotation.x = Math.sin(clock.elapsedTime * 5) * .08;
+  });
   return <group ref={ref} position={start}>
     {/* Compact service robot: armored torso, articulated limbs, face visor and utility pack. */}
     <mesh position={[0,.24,0]} castShadow><capsuleGeometry args={[.115,.24,4,10]}/><Material color={color} metalness={.48} roughness={.3}/></mesh>
@@ -146,7 +168,7 @@ function DistrictBuilding({position,kind,label,onSelect}:{position:[number,numbe
     <Road from={[-3.4,2.4]} to={[0,0]} width={.48}/>
     <Road from={[3.25,2.45]} to={[0,0]} width={.48}/>
     {forest.map((t,i)=><Tree key={i} position={[t.x,-.02,t.z]} scale={t.s} autumn={i%7===0}/>)}
-    <HQ/>\n    <DistrictBuilding position={[0,0,-6.05]} kind={3} label="Builder Hut" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[-6.05,0,0]} kind={2} label="Knowledge Archive" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[6.05,0,0]} kind={4} label="AI Infrastructure" onSelect={onDistrictSelect}/>
+    <HQ onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[0,0,-6.05]} kind={3} label="Builder Hut" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[-6.05,0,0]} kind={2} label="Knowledge Archive" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[6.05,0,0]} kind={4} label="AI Infrastructure" onSelect={onDistrictSelect}/>
     {occupied.map(({p,i,plot})=>{const x=typeof p.gridX==="number"?p.gridX:plot[0];const z=typeof p.gridZ==="number"?p.gridZ:plot[1];const building=p.id===buildingId||["under_construction","initializing"].includes(p.status);return <ProjectBuilding key={p.id} position={[x,.02,z]} project={p} index={i} onSelect={onSelect} building={building}/>;})}
     {[[ -5.7,-5.3], [5.65,-5.4],[-5.7,5.3],[5.65,5.4]].map((p,i)=><group key={i} position={[p[0],0,p[1]]}><mesh position={[0,.3,0]} castShadow><cylinderGeometry args={[.12,.16,.6,8]}/><Material color="#b9a16d" metalness={.35}/></mesh><mesh position={[0,.65,0]}><sphereGeometry args={[.13,12,10]}/><Material color="#ffe6a0" emissive="#ffcf62" emissiveIntensity={1.2}/></mesh><pointLight position={[0,.75,0]} color="#ffd887" intensity={.45} distance={2}/></group>)}
     <Agent start={[-1.5,.05,-1.2]} color="#f3c969" phase={0}/>
