@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import "./company.css";
 
-type Agent = { id: string; name: string; department: string; role_description: string; status: string; connector_id: string };
+type Agent = { id: string; name: string; department: string; role_description: string; status: string; model_id?: string | null; connector_id: string };
 type Task = { id: string; title: string; description: string; status: string; priority: string; created_by: string; result_summary?: string | null; agent_name?: string | null; department?: string | null; worker_name?: string | null; created_at: string; completed_at?: string | null };
 type Hire = { id: string; proposed_name: string; role_title: string; business_case: string; estimated_monthly_cost: string; status: string; matthew_decision_note?: string | null; cho_decision_note?: string | null; created_at: string; agent_name: string; department: string };
 type Brief = { id: string; brief_date: string; generated_at: string; summary: string; tasks_total: number; tasks_completed: number; tasks_failed: number; tasks_blocked: number; hiring_summary: Record<string, number>; notable_events: { tasks?: Task[]; hiringRequests?: Hire[]; auditEvents?: { actor_name: string; event_type: string; message: string; created_at: string }[] } };
