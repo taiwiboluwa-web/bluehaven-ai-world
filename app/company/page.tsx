@@ -95,7 +95,7 @@ export default function CompanyPage() {
       <div><span>AI DEPARTMENT HEADS</span><strong>{data?.agents.length ?? "—"}</strong><small>All routed through one connector</small></div>
       <div><span>ACTIVE WORKERS</span><strong>{data?.workers.filter((w) => w.status === "active").length ?? "—"}</strong><small>Only approved hires enter the roster</small></div>
       <div><span>OPEN TASKS</span><strong>{data?.tasks.filter((t) => ["queued","in_progress","blocked"].includes(t.status)).length ?? "—"}</strong><small>Queued, in progress or blocked</small></div>
-      <div><span>CHO ALERTS</span><strong>{data?.notifications.filter((n) => !n.read_at).length ?? "—"}</strong><small>Including Matthew's declined hires</small></div>
+      <div><span>CHO ALERTS</span><strong>{data?.notifications.filter((n) => !n.read_at).length ?? "—"}</strong><small>Including Matthew&apos;s declined hires</small></div>
     </section>
     <section className="company-section">
       <div className="company-section-head"><div><span>01 / LEADERSHIP</span><h2>Executive chain</h2></div><p>Matthew coordinates. You retain final human authority.</p></div>
@@ -116,7 +116,7 @@ export default function CompanyPage() {
           <label>Brief / expected outcome<textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={5000} placeholder="Add context, constraints and what done looks like."/></label>
           <div className="task-form-row"><label>Department<select value={agentName} onChange={(e) => setAgentName(e.target.value)}>{(data?.agents || []).map((agent) => <option key={agent.id} value={agent.name}>{agent.name} — {agent.department}</option>)}</select></label><label>Priority<select value={priority} onChange={(e) => setPriority(e.target.value)}><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label></div>
           <label>CHO admin token <input type="password" autoComplete="off" value={choToken} onChange={(e) => setChoToken(e.target.value)} placeholder="Session only; not saved" required/></label>
-          <small className="security-note">The token stays in this page's memory and is not written to the database or browser storage.</small>
+          <small className="security-note">The token stays in this page&apos;s memory and is not written to the database or browser storage.</small>
           <button className="company-primary-button" disabled={saving || !data?.agents.length}>{saving ? "Working…" : "Add task to ledger ↗"}</button>
         </form>
         <div className="task-ledger"><div className="ledger-head"><span>RECENT ASSIGNMENTS</span><strong>{data?.tasks.length ?? 0} logged</strong></div>{loading && <p className="company-muted">Loading ledger…</p>}{!loading && !data?.tasks.length && <p className="company-muted">No tasks yet. New assignments will appear here.</p>}{(data?.tasks || []).slice(0,12).map((task) => <article className="ledger-task" key={task.id}><div><strong>{task.title}</strong><p>{task.agent_name || "Unassigned"}{task.worker_name ? ` · ${task.worker_name}` : ""} · {task.priority} priority</p>{task.result_summary && <small>{task.result_summary}</small>}</div><span className={`task-status task-${task.status}`}>{humanize(task.status)}</span></article>)}</div>
@@ -129,7 +129,7 @@ export default function CompanyPage() {
       <div className="hiring-list"><div className="ledger-head"><span>FULL REQUEST HISTORY</span><strong>{data?.hiringRequests.length ?? 0} requests</strong></div>{(data?.hiringRequests || []).slice(0,10).map((hire) => <article className="ledger-task" key={hire.id}><div><strong>{hire.proposed_name} — {hire.role_title}</strong><p>{hire.agent_name} · {dateTime(hire.created_at)}</p></div><span className={`task-status task-${hire.status === "hired" ? "completed" : hire.status.includes("reject") ? "failed" : "blocked"}`}>{humanize(hire.status)}</span></article>)}</div>
     </section>
     <section className="company-section">
-      <div className="company-section-head"><div><span>05 / EXECUTIVE INBOX</span><h2>CHO notifications</h2></div><p>Matthew's hiring refusals and other escalations are recorded here.</p></div>
+      <div className="company-section-head"><div><span>05 / EXECUTIVE INBOX</span><h2>CHO notifications</h2></div><p>Matthew&apos;s hiring refusals and other escalations are recorded here.</p></div>
       <div className="notification-list">{(data?.notifications || []).slice(0,12).map((notification) => <article className="notification-row" key={notification.id}><span className="notification-mark">!</span><div><strong>{notification.title}</strong><p>{notification.message}</p><small>{dateTime(notification.created_at)}</small></div><span className={notification.read_at ? "read-label" : "unread-label"}>{notification.read_at ? "READ" : "UNREAD"}</span></article>)}{!data?.notifications.length && <p className="company-muted">Your executive inbox is clear.</p>}</div>
     </section>
     <section className="company-section brief-section">
