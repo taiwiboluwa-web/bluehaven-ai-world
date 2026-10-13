@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     let sharedContext = coordination.output;
     for (const agent of agents) {
       const taskTitle = (agent.name + " contribution: " + goal).slice(0, 180);
-      const taskRows = await sql`INSERT INTO company_tasks (title, description, department_agent_id, created_by, status, priority, started_at) VALUES (${taskTitle}, ${goal + "\n\nCoordination brief:\n" + context}, ${agent.id}, 'BlueHaven Orchestrator', 'in_progress', 'high', now()) RETURNING id`;
+      const taskRows = await sql`INSERT INTO company_tasks (title, description, department_agent_id, created_by, status, priority, started_at) VALUES (${taskTitle}, ${goal + "\n\nCoordination brief:\n" + coordination.output}, ${agent.id}, 'BlueHaven Orchestrator', 'in_progress', 'high', now()) RETURNING id`;
       const taskId = String(taskRows[0].id);
       await sql`UPDATE company_agents SET status = 'working', updated_at = now() WHERE id = ${agent.id}`;
       try {
@@ -92,9 +92,9 @@ export async function POST(request: Request) {
     const succeeded = results.filter((r) => r.status === "completed").length;
     const finalStatus = succeeded === results.length ? "completed" : succeeded > 0 ? "blocked" : "failed";
     const summary = results.map((r) => `${r.agent}: ${r.status}${r.error ? " — " + r.error : ""}`).join("\n");
-    await sql`UPDATE company_tasks SET status = ${finalStatus}, result_summary = ${("Coordination brief:\n" + context + "\n\nAgent outcomes:\n" + summary).slice(0,8000)}, completed_at = now(), updated_at = now() WHERE id = ${parentId}::uuid`;
+    await sql`UPDATE company_tasks SET status = ${finalStatus}, result_summary = ${("Coordination brief:\n" + coordination.output + "\n\nAgent outcomes:\n" + summary).slice(0,8000)}, completed_at = now(), updated_at = now() WHERE id = ${parentId}::uuid`;
     await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'BlueHaven Orchestrator', 'orchestration.finished', ${"Mission finished: " + succeeded + " of " + results.length + " agent contributions succeeded."}, 'company_task', ${parentId}::uuid, ${JSON.stringify({ succeeded, total: results.length })}::jsonb)`;
-    return NextResponse.json({ missionId: parentId, goal, coordinationBrief: context, status: finalStatus, succeeded, total: results.length, results });
+    return NextResponse.json({ missionId: parentId, goal, coordinationBrief: coordination.output, status: finalStatus, succeeded, total: results.length, results });
   } catch (error) {
     const message = error instanceof Error ? error.message : "The collaborative mission could not run.";
     return NextResponse.json({ error: message }, { status: 500 });
