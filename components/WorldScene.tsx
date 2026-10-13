@@ -50,6 +50,34 @@ function Builder({position}:{position:[number,number,number]}) {
     <mesh position={[.25,.42,0]} rotation={[0,0,.5]}><boxGeometry args={[.055,.18,.055]}/><meshStandardMaterial color="#b9b6c6"/></mesh>
   </group>;
 }
+function BuilderHut() {
+  return <group position={[-4.65,0,-4.65]}>
+    <mesh position={[0,.08,0]}><cylinderGeometry args={[.62,.7,.12,8]}/><meshStandardMaterial color="#8a7049"/></mesh>
+    <House position={[0,.12,0]} kind={0} scale={.78}/>
+    <mesh position={[.48,.42,.25]} rotation={[0,-.25,0]}><boxGeometry args={[.22,.28,.05]}/><meshStandardMaterial color="#8b633b"/></mesh>
+    <Builder position={[.72,0,.38]}/>
+  </group>;
+}
+function TravellingBuilder({start,target}:{start:[number,number];target:[number,number]}) {
+  const ref=useRef<THREE.Group>(null);
+  const startTime=useRef<number|null>(null);
+  useFrame((state)=>{
+    if(!ref.current) return;
+    if(startTime.current===null) startTime.current=state.clock.elapsedTime;
+    const elapsed=(state.clock.elapsedTime-startTime.current)%7;
+    const outbound=Math.min(1,elapsed/2.25);
+    const returning=Math.max(0,Math.min(1,(elapsed-5.1)/1.7));
+    let x=start[0], z=start[1];
+    if(elapsed<2.25){x=start[0]+(target[0]-start[0])*outbound;z=start[1]+(target[1]-start[1])*outbound;}
+    else if(elapsed<5.1){x=target[0];z=target[1];}
+    else{x=target[0]+(start[0]-target[0])*returning;z=target[1]+(start[1]-target[1])*returning;}
+    ref.current.position.set(x,.015,z);
+    if(elapsed<2.25) ref.current.rotation.y=Math.atan2(target[0]-start[0],target[1]-start[1]);
+    else if(elapsed>=5.1) ref.current.rotation.y=Math.atan2(start[0]-target[0],start[1]-target[1]);
+    ref.current.scale.setScalar(elapsed>=2.25&&elapsed<5.1?1.08:1);
+  });
+  return <group ref={ref}><Builder position={[0,0,0]}/></group>;
+}
 function Hub() {
   return <group position={[0,0,0]}>
     <mesh position={[0,.12,0]}><cylinderGeometry args={[1.0,1.13,.2,8]}/><meshStandardMaterial color="#c6a15c" roughness={.8}/></mesh>
@@ -68,7 +96,6 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
       <mesh position={[0,.55,0]}><boxGeometry args={[.9,1,.9]}/><meshStandardMaterial color="#bc985b" wireframe transparent opacity={.7}/></mesh>
       <mesh position={[0,1.08,0]}><boxGeometry args={[1.05,.06,1.05]}/><meshStandardMaterial color="#a97b42"/></mesh>
       <Sparkles count={18} scale={1.4} size={2.5} speed={.7} color="#ffdf69"/>
-      <Builder position={[0,.2,0]}/>
     </> : <>
       <House position={[0,.12,0]} kind={index+1} scale={.85}/>
       <mesh position={[0,1.43,0]}><sphereGeometry args={[.08,12,12]}/><meshBasicMaterial color={tone}/></mesh>
@@ -78,7 +105,7 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
 }
 function Village({projects,buildingId,onSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void}) {
   const grass=useMemo(()=>Array.from({length:144},(_,i)=>({x:(i%12)-5.5,z:Math.floor(i/12)-5.5})),[]);
-  const forest=useMemo(()=>Array.from({length:60},(_,i)=>({x:Math.cos(i*2.4)*(6.3+(i%3)*.4),z:Math.sin(i*2.4)*(5.9+(i%4)*.3),s:.65+(i%5)*.09})),[]);
+  const forest=useMemo(()=>Array.from({length:60},(_,i)=>({x:Math.cos(i*2.4)*(6.3+(i%3)*.4),z:Math.sin(i*2.4)*(5.9+(i%4)*.3),s:.65+(i%5)*.09})),[]);\n  const constructionProject=projects.find((project)=>project.id===buildingId);
   return <group rotation={[0,-.12,0]}>
     {grass.map((t,i)=><Tile key={i} position={[t.x*.94,-.08,t.z*.94]} color={(Math.floor(t.x+t.z)%4===0)?"#83b760":(Math.floor(t.x-t.z)%5===0)?"#78ad54":"#8abd63"}/>)}
     {grass.filter(t=>Math.abs(t.x)<4.4&&Math.abs(t.z)<4.4&&Math.abs(t.x-t.z)<1).map((t,i)=><mesh key={"path"+i} position={[t.x*.94,-.012,t.z*.94]}><boxGeometry args={[.22,.015,.22]}/><meshStandardMaterial color="#b6a77e" roughness={1}/></mesh>)}
