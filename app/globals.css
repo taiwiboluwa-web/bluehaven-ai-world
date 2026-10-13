@@ -823,3 +823,37 @@ h1 em { color: #ffdf69; }
 .district-infra .district-symbol { color:#91dff1; border-color:rgba(145,223,241,.4); background:rgba(145,223,241,.08); }
 @media (max-width: 1050px) { .district-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width: 600px) { .districts-heading { align-items:flex-start; flex-direction:column; gap:8px; } .district-grid { gap:8px; } .district-item { min-height:166px; padding:12px; grid-template-columns:24px 1fr; gap:10px 7px; } .district-symbol { width:30px; height:30px; font-size:17px; } .district-item h3 { font-size:11px; } .district-item p { font-size:9px; } }
+
+
+/* Interactive district controls: map landmarks and cards share one honest workspace state. */
+.district-item {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.district-item:focus-visible {
+  outline: 2px solid #ffde59;
+  outline-offset: 3px;
+}
+.district-item:active { transform: translateY(-1px) scale(.995); }
+.district-state { line-height: 1.5; }
+.district-detail {
+  position: relative;
+  margin-top: 12px;
+  padding: 22px 24px;
+  max-width: 760px;
+  border: 1px solid rgba(255,231,163,.28);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(39,69,53,.97), rgba(19,39,37,.98));
+  box-shadow: 0 8px 26px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.district-detail h3 { margin: 8px 0 9px; color: #fff4cf; font-size: 20px; letter-spacing: -.03em; }
+.district-detail p { max-width: 650px; margin: 0 0 13px; color: #c5d6c5; font-size: 12px; line-height: 1.8; }
+.district-detail .close-button { position: absolute; top: 12px; right: 12px; }
+.district-detail-note { color: #e8d695 !important; }
+@media (max-width: 600px) {
+  .district-detail { padding: 18px 16px; }
+  .district-detail h3 { font-size: 17px; }
+}
