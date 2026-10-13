@@ -120,8 +120,8 @@ function Agent({start,color,phase=0,destination}:{start:[number,number,number];c
     <mesh position={[0,-.025,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.14,.19,16]}/><meshBasicMaterial color={color} transparent opacity={.5}/></mesh>
   </group>;
 }
-function HQ() {
-  return <group position={[0,0,0]}>
+function HQ({onSelect}:{onSelect:(id:DistrictId)=>void}) {
+  return <group position={[0,0,0]} onClick={(e)=>{e.stopPropagation();onSelect("hq");}} onPointerOver={()=>{document.body.style.cursor="pointer";}} onPointerOut={()=>{document.body.style.cursor="auto";}}>
     <mesh position={[0,.08,0]} receiveShadow><cylinderGeometry args={[1.55,1.68,.16,8]}/><Material color="#9a8b69"/></mesh>
     <mesh position={[0,.2,0]}><cylinderGeometry args={[1.38,1.38,.08,8]}/><Material color="#c2b18a"/></mesh>
     <mesh position={[0,.83,0]} castShadow receiveShadow><boxGeometry args={[1.62,1.18,1.4]}/><Material color="#d7d0b9" roughness={.7}/></mesh>
