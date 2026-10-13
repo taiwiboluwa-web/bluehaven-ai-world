@@ -4,12 +4,14 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Float, OrbitControls, RoundedBox, Sparkles } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
+import PF from "pathfinding";
 
 type Project = {
   id: string; name: string; kind: string; status: string; description: string; tone: string;
   gridX?: number; gridZ?: number;
 };
-type Props = { projects: Project[]; buildingId: string | null; onSelect: (id: string) => void };
+type DistrictId = "hq" | "builder" | "archive" | "infrastructure";
+type Props = { projects: Project[]; buildingId: string | null; onSelect: (id: string) => void; onDistrictSelect: (id: DistrictId) => void };
 const plots: [number, number][] = [[-3.2,-2.3],[3.1,-2.5],[-3.4,2.4],[3.25,2.45],[0,-4.1],[0,4.05],[-4.5,.1],[4.45,.15]];
 
 function Material({color,roughness=.85,metalness=0,emissive,emissiveIntensity=0}:{color:string;roughness?:number;metalness?:number;emissive?:string;emissiveIntensity?:number}) {
@@ -127,7 +129,7 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
     {building?<><mesh position={[0,.72,0]} castShadow><boxGeometry args={[1,1.05,1]}/><meshStandardMaterial color="#e7c982" wireframe transparent opacity={.55}/></mesh><mesh position={[0,1.27,0]}><boxGeometry args={[1.12,.07,1.12]}/><Material color="#d2a85c"/></mesh><Sparkles count={20} scale={1.55} size={2.4} speed={.8} color="#ffdf79"/></>:<><House position={[0,.14,0]} kind={index+1} scale={.82}/><mesh position={[0,1.57,0]}><sphereGeometry args={[.065,12,12]}/><meshBasicMaterial color={tone}/></mesh><Sparkles count={project.status==="active"?7:3} scale={[.8,.3,.8]} position={[0,1.45,0]} size={1.6} speed={.22} color={tone}/></>}
   </group>;
 }
-function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void}) {
+function DistrictBuilding({position,kind,label,onSelect}:{position:[number,number,number];kind:number;label:string;onSelect:(id:DistrictId)=>void}) {\n  const id=label==="Builder Hut"?"builder":label==="Knowledge Archive"?"archive":label==="AI Infrastructure"?"infrastructure":"hq";\n  const accent=id==="builder"?"#b9ed91":id==="archive"?"#c5b5ff":id==="infrastructure"?"#91dff1":"#ffdf78";\n  return <group position={position} onClick={(e)=>{e.stopPropagation();onSelect(id as DistrictId);}} onPointerOver={(e)=>{e.stopPropagation();document.body.style.cursor="pointer";}} onPointerOut={()=>{document.body.style.cursor="auto";}}>\n    <mesh position={[0,.055,0]} receiveShadow><cylinderGeometry args={[1.02,1.12,.13,8]}/><Material color="#9b9b77"/></mesh>\n    <mesh position={[0,.13,0]}><ringGeometry args={[.86,.96,8]}/><meshBasicMaterial color={accent} transparent opacity={.9}/></mesh>\n    <House position={[0,.1,0]} kind={kind} scale={.9}/>\n    <mesh position={[0,1.88,.03]}><boxGeometry args={[.92,.23,.07]}/><Material color="#24452f" metalness={.2}/></mesh>\n    <mesh position={[0,1.88,.073]}><boxGeometry args={[.76,.035,.012]}/><Material color={accent} emissive={accent} emissiveIntensity={.8}/></mesh>\n    <Sparkles count={7} position={[0,1.7,0]} scale={[1.15,.5,1.15]} size={1.7} speed={.25} color={accent}/>\n  </group>;\n}\nfunction World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
   const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
   const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
   return <group>
@@ -144,7 +146,7 @@ function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:str
     <Road from={[-3.4,2.4]} to={[0,0]} width={.48}/>
     <Road from={[3.25,2.45]} to={[0,0]} width={.48}/>
     {forest.map((t,i)=><Tree key={i} position={[t.x,-.02,t.z]} scale={t.s} autumn={i%7===0}/>)}
-    <HQ/>
+    <HQ/>\n    <DistrictBuilding position={[0,0,-6.05]} kind={3} label="Builder Hut" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[-6.05,0,0]} kind={2} label="Knowledge Archive" onSelect={onDistrictSelect}/>\n    <DistrictBuilding position={[6.05,0,0]} kind={4} label="AI Infrastructure" onSelect={onDistrictSelect}/>
     {occupied.map(({p,i,plot})=>{const x=typeof p.gridX==="number"?p.gridX:plot[0];const z=typeof p.gridZ==="number"?p.gridZ:plot[1];const building=p.id===buildingId||["under_construction","initializing"].includes(p.status);return <ProjectBuilding key={p.id} position={[x,.02,z]} project={p} index={i} onSelect={onSelect} building={building}/>;})}
     {[[ -5.7,-5.3], [5.65,-5.4],[-5.7,5.3],[5.65,5.4]].map((p,i)=><group key={i} position={[p[0],0,p[1]]}><mesh position={[0,.3,0]} castShadow><cylinderGeometry args={[.12,.16,.6,8]}/><Material color="#b9a16d" metalness={.35}/></mesh><mesh position={[0,.65,0]}><sphereGeometry args={[.13,12,10]}/><Material color="#ffe6a0" emissive="#ffcf62" emissiveIntensity={1.2}/></mesh><pointLight position={[0,.75,0]} color="#ffd887" intensity={.45} distance={2}/></group>)}
     <Agent start={[-1.5,.05,-1.2]} color="#f3c969" phase={0}/>
@@ -153,12 +155,12 @@ function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:str
     <ContactShadows position={[0,-.02,0]} opacity={.22} scale={19} blur={2.2} far={5}/>
   </group>;
 }
-export default function WorldScene({projects,buildingId,onSelect}:Props) {
+export default function WorldScene({projects,buildingId,onSelect,onDistrictSelect}:Props) {
   return <Canvas shadows dpr={[1,1.15]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance"}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
     <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
     <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
     <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
-    <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect}/></Float></Suspense>
+    <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect} onDistrictSelect={onDistrictSelect}/></Float></Suspense>
     <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={17} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
   </Canvas>;
 }
