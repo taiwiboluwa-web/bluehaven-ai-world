@@ -9,7 +9,7 @@ const WorldScene = dynamic(() => import("@/components/WorldScene"), {
   loading: () => <div className="scene-loading" role="status">Preparing your village…</div>,
 });
 
-type Project = {
+const BUILD_PLOTS: [number, number][] = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];\n\ntype Project = {
   id: string;
   name: string;
   kind: string;
@@ -48,6 +48,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [purpose, setPurpose] = useState("Answer questions using my documents");
   const [template, setTemplate] = useState("Document Question-Answering Agent");
+  const [plotChoice, setPlotChoice] = useState("auto");
   const [buildingId, setBuildingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -78,7 +79,7 @@ export default function Home() {
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), purpose: purpose.trim(), template }),
+        body: JSON.stringify({ name: name.trim(), purpose: purpose.trim(), template, ...(plotChoice === "auto" ? {} : { gridX: Number(plotChoice.split(",")[0]), gridZ: Number(plotChoice.split(",")[1]) }) }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Project creation failed.");
@@ -87,6 +88,7 @@ export default function Home() {
       setBuildingId(created.id);
       setSelected(created.id);
       setName("");
+      setPlotChoice("auto");
       setShowWizard(false);
 
       // The animation window is followed by a real backend/gateway health check.
@@ -154,6 +156,8 @@ export default function Home() {
     }
   }
 
+  const occupiedPlotKeys = new Set(projects.filter((p) => p.status !== "offline" && typeof p.gridX === "number" && typeof p.gridZ === "number").map((p) => `${p.gridX},${p.gridZ}`));
+  const availablePlots = BUILD_PLOTS.filter(([x, z]) => !occupiedPlotKeys.has(`${x},${z}`));
   const activeProject = projects.find((p) => p.id === selected);
 
   return <main className="app-shell">
@@ -176,7 +180,7 @@ export default function Home() {
       {projects.map((p) => <button className={`project-row ${selected === p.id ? "is-selected" : ""}`} key={p.id} onClick={() => setSelected(p.id)}><span className={`project-glyph ${p.tone}`}>{p.kind.includes("DOCUMENT") ? "▤" : p.kind.includes("WEB") ? "⌖" : "✳"}</span><span className="project-main"><strong>{p.name}</strong><small>{p.description}</small></span><span className="project-kind">{p.kind}</span><span className={`status-pill ${p.status === "under_construction" || p.status === "initializing" ? "building" : p.status === "active" || p.status === "processing" ? "active" : p.status === "failed" ? "failed" : "idle"}`}><i />{statusLabel(p.status)}</span><span className="row-arrow">↗</span></button>)}</div></section>
     <footer className="footer"><span>BLUEHAVEN STUDIOS</span><span>CREATIVITY BEYOND LIMITS</span><span>THE WORLD GROWS WITH YOU.</span></footer>
 
-    {showWizard && <div className="modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !saving) setShowWizard(false); }}><section className="wizard-modal" role="dialog" aria-modal="true" aria-labelledby="wizard-title"><div className="modal-top"><span className="section-tag">NEW CONSTRUCTION / STEP 01</span><button className="close-button" onClick={() => setShowWizard(false)} aria-label="Close">×</button></div><h2 id="wizard-title">Name your <em>next build.</em></h2><p className="modal-copy">Choose what this agent does. Your builder will reserve a plot, save the project, and verify the AI gateway before the building becomes operational.</p><label>PROJECT NAME<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Customer Support Archive" maxLength={80}/></label><label>WHAT SHOULD THIS AGENT DO?<textarea value={purpose} onChange={(e) => setPurpose(e.target.value)} rows={3} maxLength={2000}/></label><label>STARTING TEMPLATE<select value={template} onChange={(e) => setTemplate(e.target.value)}><option>Document Question-Answering Agent</option><option>Web Research Scout</option><option>AI Workflow Forge</option><option>API Integration Gateway</option><option>Custom AI Agent</option></select></label><div className="wizard-note"><span>⌂</span><p><strong>Builder deployment</strong><br/>The project and job are saved in Neon. The building activates only after the server confirms that the AI gateway is configured and reachable.</p></div><button className="gold-button modal-submit" disabled={!name.trim() || !purpose.trim() || saving} onClick={createProject}>{saving ? "Saving project…" : "Choose plot & build"} <span>↗</span></button></section></div>}
+    {showWizard && <div className="modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !saving) setShowWizard(false); }}><section className="wizard-modal" role="dialog" aria-modal="true" aria-labelledby="wizard-title"><div className="modal-top"><span className="section-tag">NEW CONSTRUCTION / STEP 01</span><button className="close-button" onClick={() => setShowWizard(false)} aria-label="Close">×</button></div><h2 id="wizard-title">Name your <em>next build.</em></h2><p className="modal-copy">Choose what this agent does. Your builder will reserve a plot, save the project, and verify the AI gateway before the building becomes operational.</p><label>PROJECT NAME<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Customer Support Archive" maxLength={80}/></label><label>WHAT SHOULD THIS AGENT DO?<textarea value={purpose} onChange={(e) => setPurpose(e.target.value)} rows={3} maxLength={2000}/></label><label>BUILDING PLOT<select value={plotChoice} onChange={(e) => setPlotChoice(e.target.value)}><option value="auto">Automatic placement — first free plot</option>{availablePlots.map(([x,z]) => <option key={`${x},${z}`} value={`${x},${z}`}>Plot {x}, {z}</option>)}</select></label><label>STARTING TEMPLATE<select value={template} onChange={(e) => setTemplate(e.target.value)}><option>Document Question-Answering Agent</option><option>Web Research Scout</option><option>AI Workflow Forge</option><option>API Integration Gateway</option><option>Custom AI Agent</option></select></label><div className="wizard-note"><span>⌂</span><p><strong>Builder deployment</strong><br/>The project and job are saved in Neon. The building activates only after the server confirms that the AI gateway is configured and reachable.</p></div><button className="gold-button modal-submit" disabled={!name.trim() || !purpose.trim() || saving} onClick={createProject}>{saving ? "Saving project…" : "Choose plot & build"} <span>↗</span></button></section></div>}
 
     {activeProject && !showWizard && <aside className="detail-panel"><button className="close-button" onClick={() => setSelected(null)} aria-label="Close details">×</button><span className="section-tag">BUILDING DETAILS / {activeProject.id.slice(0,8).toUpperCase()}</span><h3>{activeProject.name}</h3><p>{activeProject.description}</p><div className={`status-pill ${activeProject.status === "under_construction" || activeProject.status === "initializing" ? "building" : activeProject.status === "active" ? "active" : activeProject.status === "failed" ? "failed" : "idle"}`}><i />{statusLabel(activeProject.status)}</div>{activeProject.lastError && <p className="detail-error">{activeProject.lastError}</p>}<div className="detail-divider"/><span className="detail-label">PROJECT TEMPLATE</span><strong className="detail-value">{activeProject.template}</strong><span className="detail-label">VILLAGE COORDINATES</span><strong className="detail-value">{activeProject.gridX ?? "—"} / {activeProject.gridZ ?? "—"}</strong><span className="detail-label">BUILDER SYSTEM</span><strong className="detail-value">{activeProject.status === "under_construction" || activeProject.status === "initializing" ? "Construction / gateway check" : activeProject.status === "active" ? "Operational" : activeProject.status === "failed" ? "Needs configuration or retry" : "Saved project"}</strong>{activeProject.status === "under_construction" && <div className="progress-track"><span/></div>}<div className="detail-actions">{activeProject.status === "active" && <button className="detail-action" onClick={() => void projectAction(activeProject.id,"pause")}>Pause agent <span>Ⅱ</span></button>}{activeProject.status === "paused" && <button className="detail-action" onClick={() => void projectAction(activeProject.id,"resume")}>Resume agent <span>↗</span></button>}{!["offline","under_construction","initializing"].includes(activeProject.status) && <button className="detail-action" onClick={() => void projectAction(activeProject.id,"stop")}>Stop agent <span>×</span></button>}</div><button className="detail-action" onClick={() => setSelected(null)}>Back to village <span>↗</span></button></aside>}
   </main>;
