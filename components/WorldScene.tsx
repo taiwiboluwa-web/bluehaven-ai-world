@@ -16,7 +16,7 @@ function Material({color,roughness=.85,metalness=0,emissive,emissiveIntensity=0}
   return <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} emissive={emissive} emissiveIntensity={emissiveIntensity}/>;
 }
 function Tree({position,scale=1,autumn=false}:{position:[number,number,number];scale?:number;autumn?:boolean}) {
-  const greens=autumn?["#9e7648","#bd965b","#d0aa6b"]:["#285a43","#33764f","#43885a"];
+  const greens=autumn?["#9e7648","#bd965b","#d0aa6b"]:["#347448","#438b4f","#5aa65b"];
   return <group position={position} scale={scale}>
     <mesh position={[0,.34,0]} castShadow><cylinderGeometry args={[.09,.15,.68,8]}/><Material color="#74503a"/></mesh>
     <mesh position={[0,.83,0]} castShadow><icosahedronGeometry args={[.43,1]}/><Material color={greens[0]}/></mesh>
@@ -26,8 +26,8 @@ function Tree({position,scale=1,autumn=false}:{position:[number,number,number];s
   </group>;
 }
 function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:number;scale?:number}) {
-  const walls=["#d7c3a0","#c6c9bf","#b9afd5","#d9c78e"];
-  const roofs=["#4d4642","#5c6870","#65518a","#8d5943"];
+  const walls=["#f0d6a1","#d5e4ce","#d5c5ef","#f4df9a"];
+  const roofs=["#a84435","#477b9b","#7650a5","#b76535"];
   const trim=["#f0dfbc","#e7e7dc","#e2d8f6","#f5e7b8"];
   return <group position={position} scale={scale}>
     <mesh position={[0,.1,0]} receiveShadow castShadow><boxGeometry args={[1.1,.18,1.02]}/><Material color="#8c8977"/></mesh>
@@ -72,8 +72,8 @@ function HQ() {
 function Road({from,to,width=.55}:{from:[number,number];to:[number,number];width?:number}) {
   const dx=to[0]-from[0], dz=to[1]-from[1], length=Math.hypot(dx,dz), angle=-Math.atan2(dz,dx);
   return <group position={[(from[0]+to[0])/2,-.005,(from[1]+to[1])/2]} rotation={[0,angle,0]}>
-    <mesh receiveShadow><boxGeometry args={[length,.035,width]}/><Material color="#b9b09b" roughness={1}/></mesh>
-    <mesh position={[0,.02,0]}><boxGeometry args={[length,.012,width*.72]}/><Material color="#d4cbb4" roughness={1}/></mesh>
+    <mesh receiveShadow><boxGeometry args={[length,.035,width]}/><Material color="#c9c09e" roughness={1}/></mesh>
+    <mesh position={[0,.02,0]}><boxGeometry args={[length,.012,width*.72]}/><Material color="#e2d8b7" roughness={1}/></mesh>
     {Array.from({length:Math.max(1,Math.floor(length/1.1))},(_,i)=><mesh key={i} position={[-length/2+.55+i*1.1,.03,0]}><boxGeometry args={[.38,.008,.025]}/><Material color="#f5e6c1" roughness={1}/></mesh>)}
   </group>;
 }
@@ -92,9 +92,9 @@ function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:str
   const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
   const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
   return <group>
-    <mesh position={[0,-.32,0]} receiveShadow><cylinderGeometry args={[11.9,12.2,.7,12]}/><Material color="#3a5149" roughness={1}/></mesh>
-    <mesh position={[0,-.1,0]} receiveShadow><cylinderGeometry args={[11.5,11.8,.22,12]}/><Material color="#719568" roughness={1}/></mesh>
-    {ground.map((t,i)=><mesh key={i} position={[t.x*.58,-.015,t.z*.58]} receiveShadow><boxGeometry args={[.56,.04,.56]}/><Material color={(i%7===0)?"#86a96d":(i%5===0)?"#83a96b":"#7da365"} roughness={1}/></mesh>)}
+    <mesh position={[0,-.32,0]} receiveShadow><cylinderGeometry args={[11.9,12.2,.7,12]}/><Material color="#4c7650" roughness={1}/></mesh>
+    <mesh position={[0,-.1,0]} receiveShadow><cylinderGeometry args={[11.5,11.8,.22,12]}/><Material color="#83b76a" roughness={1}/></mesh>
+    {ground.map((t,i)=><mesh key={i} position={[t.x*.58,-.015,t.z*.58]} receiveShadow><boxGeometry args={[.56,.04,.56]}/><Material color={(i%7===0)?"#9bc878":(i%5===0)?"#91c16f":"#85b766"} roughness={1}/></mesh>)}
     <Road from={[0,0]} to={[0,-5.9]} width={.62}/>
     <Road from={[0,0]} to={[0,5.8]} width={.62}/>
     <Road from={[0,0]} to={[-5.9,0]} width={.62}/>
@@ -114,9 +114,9 @@ function World({projects,buildingId,onSelect}:{projects:Project[];buildingId:str
   </group>;
 }
 export default function WorldScene({projects,buildingId,onSelect}:Props) {
-  return <Canvas shadows dpr={[1,1.5]} camera={{position:[11,11,13],fov:34}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>{gl.setClearColor("#17252a",1);}}>
-    <color attach="background" args={["#17252a"]}/><fog attach="fog" args={["#17252a",20,33]}/>
-    <ambientLight intensity={.8}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
+  return <Canvas shadows dpr={[1,1.5]} camera={{position:[11,11,13],fov:34}} gl={{antialias:true,alpha:true}} onCreated={({gl})=>{gl.setClearColor("#28443d",1);}}>
+    <color attach="background" args={["#28443d"]}/><fog attach="fog" args={["#28443d",23,36]}/>
+    <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
     <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
     <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect}/></Float></Suspense>
     <OrbitControls makeDefault enablePan={false} minDistance={10} maxDistance={21} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
