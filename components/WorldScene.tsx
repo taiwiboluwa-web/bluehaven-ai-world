@@ -74,19 +74,19 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
     <Block p={[0,.11,.73]} s={[.38,.07,.16]} color="#b8a581" r={.02}/>
   </group>;
 }
-function Agent({start,color,phase=0,destination}:{start:[number,number,number];color:string;phase?:number;destination:[number,number]}) {
+function Agent({start,color,phase=0,destination,obstacles}:{start:[number,number,number];color:string;phase?:number;destination:[number,number];obstacles:[number,number][]}) {
   const ref=useRef<THREE.Group>(null);
   const limbs=useRef<THREE.Group>(null);
   const route=useMemo(() => {
     const grid = new PF.Grid(19, 19);
-    for (let x = 8; x <= 10; x++) for (let z = 8; z <= 10; z++) grid.setWalkableAt(x, z, false);
+    for (let x = 8; x <= 10; x++) for (let z = 8; z <= 10; z++) grid.setWalkableAt(x, z, false);\n    for (const [x, z] of obstacles) grid.setWalkableAt(Math.max(0, Math.min(18, Math.round(x + 9))), Math.max(0, Math.min(18, Math.round(z + 9))), false);
     const from = [Math.max(0, Math.min(18, Math.round(start[0] + 9))), Math.max(0, Math.min(18, Math.round(start[2] + 9)))];
     const to = [Math.max(0, Math.min(18, Math.round(destination[0] + 9))), Math.max(0, Math.min(18, Math.round(destination[1] + 9)))];
     grid.setWalkableAt(from[0], from[1], true);
     grid.setWalkableAt(to[0], to[1], true);
     const path = new PF.AStarFinder({ allowDiagonal: true, dontCrossCorners: true }).findPath(from[0], from[1], to[0], to[1], grid);
     return path.length > 1 ? path.map(([x, z]) => [x - 9, z - 9] as [number, number]) : [[start[0], start[2]], [destination[0], destination[1]]];
-  }, [start, destination]);
+  }, [start, destination, obstacles]);
   useFrame(({ clock }, delta) => {
     if (!ref.current) return;
     const travel = (clock.elapsedTime * .72 + phase) % Math.max(1, route.length - 1);
@@ -165,7 +165,7 @@ function DistrictBuilding({position,kind,label,onSelect}:{position:[number,numbe
 }
 function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
   const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
-  const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
+  const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));\n  const obstacles=useMemo<[number,number][]>(()=>[...projects.map((p,i)=>[typeof p.gridX==="number"?p.gridX:plots[i%plots.length][0],typeof p.gridZ==="number"?p.gridZ:plots[i%plots.length][1]] as [number,number]),[0,0],[0,-6.05],[-6.05,0],[6.05,0]], [projects]);
   return <group>
     <mesh position={[0,-.32,0]} receiveShadow><cylinderGeometry args={[11.9,12.2,.7,12]}/><Material color="#4c7650" roughness={1}/></mesh>
     <mesh position={[0,-.1,0]} receiveShadow><cylinderGeometry args={[11.5,11.8,.22,12]}/><Material color="#83b76a" roughness={1}/></mesh>
