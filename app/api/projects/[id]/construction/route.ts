@@ -16,7 +16,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY;
     const model = process.env.AI_DEFAULT_MODEL;
     if (!apiKey || !model) {
-      const message = "Construction saved, but activation is waiting for AI_GATEWAY_API_KEY and AI_DEFAULT_MODEL to be configured in the server environment.";
+      const message = "Project saved, but activation is waiting for AI_GATEWAY_API_KEY and AI_DEFAULT_MODEL in the server environment.";
       await sql`UPDATE ai_projects SET status = 'failed', last_error = ${message}, updated_at = now() WHERE id = ${id}::uuid`;
       await sql`UPDATE agent_jobs SET status = 'failed', error = ${message}, finished_at = now(), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'queued'`;
       await sql`INSERT INTO agent_events (project_id, event_type, message) VALUES (${id}::uuid, 'construction.blocked', ${message})`;
@@ -26,25 +26,27 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     await sql`UPDATE ai_projects SET status = 'initializing', last_error = NULL, updated_at = now() WHERE id = ${id}::uuid`;
     await sql`UPDATE agent_jobs SET status = 'running', progress = 70, started_at = COALESCE(started_at, now()), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'queued'`;
     const baseUrl = (process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, "");
-    const health = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model, messages: [{ role: "user", content: "Reply with exactly: BLUEHAVEN_AGENT_READY" }], max_tokens: 12, temperature: 0 }),
-      signal: AbortSignal.timeout(25000),
+    // Validate the gateway and selected model without spending tokens on a billable chat completion.
+    const response = await fetch(`${baseUrl}/models`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(20000),
+      cache: "no-store",
     });
-    const data = await health.json() as { choices?: { message?: { content?: string } }[]; error?: { message?: string } };
-    if (!health.ok || !data.choices?.[0]?.message?.content) {
-      const message = data.error?.message || `AI gateway health check failed (HTTP ${health.status}).`;
+    const data = await response.json() as { data?: { id?: string }[]; error?: { message?: string } };
+    const modelAvailable = data.data?.some((entry) => entry.id === model);
+    if (!response.ok || !modelAvailable) {
+      const message = data.error?.message || (response.ok ? `Configured model "${model}" was not listed by the gateway.` : `AI gateway check failed (HTTP ${response.status}).`);
       await sql`UPDATE ai_projects SET status = 'failed', last_error = ${message}, updated_at = now() WHERE id = ${id}::uuid`;
       await sql`UPDATE agent_jobs SET status = 'failed', error = ${message}, finished_at = now(), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'running'`;
       await sql`INSERT INTO agent_events (project_id, event_type, message) VALUES (${id}::uuid, 'construction.failed', ${message})`;
       return NextResponse.json({ status: "failed", error: message }, { status: 502 });
     }
 
-    await sql`UPDATE ai_projects SET status = 'active', last_error = NULL, updated_at = now() WHERE id = ${id}::uuid`;
-    await sql`UPDATE agent_jobs SET status = 'succeeded', progress = 100, output = ${JSON.stringify({ model, healthCheck: "passed" })}::jsonb, finished_at = now(), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'running'`;
-    await sql`INSERT INTO agent_events (project_id, event_type, message, payload) VALUES (${id}::uuid, 'construction.completed', 'AI gateway health check passed; building is operational.', ${JSON.stringify({ model })}::jsonb)`;
-    return NextResponse.json({ status: "active", model, message: "AI gateway verified. Building is operational." });
+    await sql`UPDATE ai_projects SET status = 'active', last_error = NULL, model_id = ${model}, updated_at = now() WHERE id = ${id}::uuid`;
+    await sql`UPDATE agent_jobs SET status = 'succeeded', progress = 100, output = ${JSON.stringify({ model, gatewayCheck: "passed" })}::jsonb, finished_at = now(), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'running'`;
+    await sql`INSERT INTO agent_events (project_id, event_type, message, payload) VALUES (${id}::uuid, 'construction.completed', 'Gateway and model availability check passed; building is operational.', ${JSON.stringify({ model })}::jsonb)`;
+    return NextResponse.json({ status: "active", model, message: "Gateway and model verified. Building is operational." });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Construction could not be completed.";
     return NextResponse.json({ error: message }, { status: 503 });
