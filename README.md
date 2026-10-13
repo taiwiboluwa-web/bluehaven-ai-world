@@ -10,7 +10,7 @@ BlueHaven AI World turns AI project operations into a living, isometric village.
 - **AI Infrastructure:** Neon-backed persistence and an OpenAI-compatible model gateway.
 - **Village map:** a 3D overview with project buildings, moving builder units, orbit controls, and visible operational states.
 
-The village is a product interface, not a claim that a project is running just because an animation finished. Project creation is persisted through the API, and activation is gated by server-side gateway/model checks. Keep animation feedback separate from backend truth.
+The village is a product interface, not a claim that a project is running just because an animation finished. Project creation is persisted through the API, and activation is gated by server-side gateway/model checks. Keep animation feedback separate from backend truth. The HQ and district landmarks are selectable; the Builder Hut opens the existing project workflow, while the Knowledge Archive clearly identifies document upload/indexing as not yet connected.
 
 
 BlueHaven AI World is an interactive isometric village for creating and operating AI projects. The village UI is built with Next.js App Router, TypeScript, Three.js, and React Three Fiber. Projects, construction jobs, and audit events persist in Neon Postgres.
@@ -19,6 +19,8 @@ BlueHaven AI World is an interactive isometric village for creating and operatin
 
 - Next.js 15 App Router + TypeScript
 - Three.js / React Three Fiber for the village viewport
+- `pathfinding` A* routing for builder units around occupied plot coordinates
+- Zustand for shared selected-district state between the map and district controls
 - Neon Postgres through `@neondatabase/serverless`
 - OpenAI-compatible model gateway (OpenRouter by default; compatible self-hosted gateways can be used)
 
