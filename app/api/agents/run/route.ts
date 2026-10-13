@@ -5,6 +5,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const serviceToken = process.env.AGENT_SERVICE_TOKEN;
+  if (!serviceToken) return NextResponse.json({ error: "Agent execution is disabled until AGENT_SERVICE_TOKEN is configured." }, { status: 503 });
+  if (request.headers.get("authorization") !== `Bearer ${serviceToken}`) return NextResponse.json({ error: "Unauthorized agent execution request." }, { status: 401 });
   try {
     const body = await request.json() as { projectId?: string; input?: string; model?: string };
     const projectId = body.projectId;
