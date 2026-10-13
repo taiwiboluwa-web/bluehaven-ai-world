@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./backend.css";
 
 export const metadata: Metadata = {
   title: "BlueHaven AI World — Build beyond limits",
