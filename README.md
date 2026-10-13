@@ -16,6 +16,7 @@ Set these as server-side environment variables in Vercel or your local `.env.loc
 - `DATABASE_URL`: Neon Postgres connection string for the BlueHaven AI World database.
 - `AI_GATEWAY_API_KEY`: API key for your chosen OpenAI-compatible model gateway.
 - `AI_DEFAULT_MODEL`: model identifier available to that key.
+- `AGENT_SERVICE_TOKEN`: long random server-only token required to call the agent execution API.
 - `AI_GATEWAY_BASE_URL`: gateway endpoint; defaults to `https://openrouter.ai/api/v1`.
 
 For OpenRouter, use a model ID available to your account. Never prefix secrets with `NEXT_PUBLIC_`, commit them to Git, or expose them in client code. `.env.example` contains names only.
@@ -36,8 +37,8 @@ Add the required values to `.env.local` before creating projects. The schema is 
 - `POST /api/projects`: validates a project, allocates a currently free plot, and persists the project, queued job, and event.
 - `GET /api/projects/:id`: returns project details, recent jobs, and events.
 - `PATCH /api/projects/:id`: pauses, resumes, or stops a project.
-- `POST /api/projects/:id/construction`: verifies the configured model gateway before marking a building operational; otherwise it records a clear failure state.
-- `POST /api/agents/run`: sends a prompt to the configured OpenAI-compatible chat-completions endpoint and records the outcome.
+- `POST /api/projects/:id/construction`: verifies gateway authentication and model availability without consuming inference tokens before marking a building operational; otherwise it records a clear failure state.
+- `POST /api/agents/run`: sends a prompt to the configured OpenAI-compatible chat-completions endpoint and records the outcome. Requires `Authorization: Bearer <AGENT_SERVICE_TOKEN>` and is not exposed as an unauthenticated browser action.
 
 The current agent runner is a single-turn model adapter, not yet a sandboxed autonomous tool-execution system. Browser, shell, GitHub, and deployment tools must be added as separately permissioned adapters before production use. Authentication and per-user authorization must also be added before exposing this service to multiple users.
 
