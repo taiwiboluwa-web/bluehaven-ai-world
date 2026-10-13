@@ -80,7 +80,7 @@ function Road({from,to,width=.55}:{from:[number,number];to:[number,number];width
 function ProjectBuilding({position,project,index,onSelect,building}:{position:[number,number,number];project:Project;index:number;onSelect:(id:string)=>void;building:boolean}) {
   const ref=useRef<THREE.Group>(null);
   const tone=project.status==="failed"?"#ff766c":project.tone==="mint"?"#83dbb5":project.tone==="violet"?"#b9a5ff":"#ffdf79";
-  useFrame((state,delta)=>{if(ref.current){ref.current.rotation.y += delta*(building?.18:.012);if(building)ref.current.position.y=position[1]+.06+Math.sin(state.clock.elapsedTime*4)*.025;}});
+  useFrame((state,delta)=>{if(ref.current){ref.current.rotation.y += delta*(building ? .18 : .012);if(building)ref.current.position.y=position[1]+.06+Math.sin(state.clock.elapsedTime*4)*.025;}});
   return <group ref={ref} position={position} onClick={(e)=>{e.stopPropagation();onSelect(project.id)}}>
     <mesh position={[0,.06,0]} castShadow receiveShadow><cylinderGeometry args={[.85,.92,.16,8]}/><Material color={building?"#bd8c47":"#8b9278"}/></mesh>
     <mesh position={[0,.15,0]}><ringGeometry args={[.72,.8,8]}/><meshBasicMaterial color={tone} transparent opacity={.8}/></mesh>
