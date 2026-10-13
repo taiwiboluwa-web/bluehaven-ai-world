@@ -158,7 +158,7 @@ export default function Home() {
     }
   }
 
-  const occupiedPlotKeys = new Set(projects.filter((p) => p.status !== "offline" && typeof p.gridX === "number" && typeof p.gridZ === "number").map((p) => `${p.gridX},${p.gridZ}`));
+  const occupiedPlotKeys = new Set(projects.filter((p) => typeof p.gridX === "number" && typeof p.gridZ === "number").map((p) => `${p.gridX},${p.gridZ}`));
   const availablePlots = BUILD_PLOTS.filter(([x, z]) => !occupiedPlotKeys.has(`${x},${z}`));
   const activeProject = projects.find((p) => p.id === selected);
 
