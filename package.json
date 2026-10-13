@@ -26,7 +26,6 @@
     "@types/three": "^0.179.0",
     "eslint": "^9.31.0",
     "eslint-config-next": "^15.5.0",
-    "typescript": "^5.8.3",
-    "@types/pathfinding": "^0.1.4"
+    "typescript": "^5.8.3"
   }
 }
