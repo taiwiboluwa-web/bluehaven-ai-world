@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   if (!authorized(request)) return NextResponse.json({ error: "Valid CHO or agent service authorization is required." }, { status: 401 });
   try {
     const sql = await ensureTable();
-    const drafts = await sql`SELECT id, title, body, platforms, status, created_by, approval_note, published_at, created_at, updated_at FROM creator_content_drafts ORDER BY created_at DESC LIMIT 50`;
+    const drafts = await sql`SELECT id, title, body, platforms, status, created_by, approval_note, published_at, external_ids, created_at, updated_at FROM creator_content_drafts ORDER BY created_at DESC LIMIT 50`;
     return NextResponse.json({ drafts });
   } catch {
     return NextResponse.json({ error: "Creator draft storage is unavailable. Verify DATABASE_URL and Neon connectivity." }, { status: 503 });
