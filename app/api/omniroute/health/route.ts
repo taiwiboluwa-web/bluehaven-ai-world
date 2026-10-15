@@ -8,8 +8,13 @@ function getGatewayConfig() {
   const fallbackBase = process.env.AI_GATEWAY_BASE_URL?.trim() || "https://openrouter.ai/api/v1";
   const base = (configuredBase || fallbackBase).replace(/\/+$/, "");
   const isOmniRoute = Boolean(configuredBase);
-  const model = process.env.OMNIROUTE_DEFAULT_MODEL?.trim() || process.env.AI_DEFAULT_MODEL?.trim() || "";
-  const apiKey = process.env.OMNIROUTE_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY || "";
+  const model = isOmniRoute
+    ? process.env.OMNIROUTE_DEFAULT_MODEL?.trim() || ""
+    : process.env.AI_DEFAULT_MODEL?.trim() || "";
+  // Never forward a fallback-provider key to OmniRoute.
+  const apiKey = isOmniRoute
+    ? process.env.OMNIROUTE_API_KEY || ""
+    : process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY || "";
   return { base, model, apiKey, isOmniRoute };
 }
 
