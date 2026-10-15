@@ -13,6 +13,11 @@ type Project = {
 type DistrictId = "hq" | "builder" | "archive" | "infrastructure";
 type Props = { projects: Project[]; buildingId: string | null; onSelect: (id: string) => void; onDistrictSelect: (id: DistrictId) => void };
 const plots: [number, number][] = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];
+const AGENT_ROUTES = [
+  { start: [-1.5,.05,-1.2] as [number,number,number], destination: [-3.9,-2.3] as [number,number], color: "#f3c969", phase: 0 },
+  { start: [1.7,.05,1.2] as [number,number,number], destination: [3.8,-2.5] as [number,number], color: "#8ce0b0", phase: 2.3 },
+  { start: [-1.2,.05,1.6] as [number,number,number], destination: [-4.1,2.4] as [number,number], color: "#a9a1ff", phase: 4.4 },
+];
 
 function Material({color,roughness=.85,metalness=0,emissive,emissiveIntensity=0}:{color:string;roughness?:number;metalness?:number;emissive?:string;emissiveIntensity?:number}) {
   return <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} emissive={emissive} emissiveIntensity={emissiveIntensity}/>;
@@ -188,9 +193,7 @@ function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project
     <DistrictBuilding position={[6.05,0,0]} kind={4} label="AI Infrastructure" onSelect={onDistrictSelect}/>
     {occupied.map(({p,i,plot})=>{const x=typeof p.gridX==="number"?p.gridX:plot[0];const z=typeof p.gridZ==="number"?p.gridZ:plot[1];const building=p.id===buildingId||["under_construction","initializing"].includes(p.status);return <ProjectBuilding key={p.id} position={[x,.02,z]} project={p} index={i} onSelect={onSelect} building={building}/>;})}
     {[[ -5.7,-5.3], [5.65,-5.4],[-5.7,5.3],[5.65,5.4]].map((p,i)=><group key={i} position={[p[0],0,p[1]]}><mesh position={[0,.3,0]} castShadow><cylinderGeometry args={[.12,.16,.6,8]}/><Material color="#b9a16d" metalness={.35}/></mesh><mesh position={[0,.65,0]}><sphereGeometry args={[.13,12,10]}/><Material color="#ffe6a0" emissive="#ffcf62" emissiveIntensity={1.2}/></mesh><pointLight position={[0,.75,0]} color="#ffd887" intensity={.45} distance={2}/></group>)}
-    <Agent start={[-1.5,.05,-1.2]} destination={[-3.9,-2.3]} obstacles={obstacles} color="#f3c969" phase={0}/>
-    <Agent start={[1.7,.05,1.2]} destination={[3.8,-2.5]} obstacles={obstacles} color="#8ce0b0" phase={2.3}/>
-    <Agent start={[-1.2,.05,1.6]} destination={[-4.1,2.4]} obstacles={obstacles} color="#a9a1ff" phase={4.4}/>
+    {AGENT_ROUTES.map((route) => <Agent key={route.color} start={route.start} destination={route.destination} obstacles={obstacles} color={route.color} phase={route.phase}/> )}
     <ContactShadows position={[0,-.02,0]} opacity={.18} scale={19} blur={1.7} far={4.5} resolution={128}/>
   </group>;
 }
