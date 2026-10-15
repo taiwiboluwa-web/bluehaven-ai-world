@@ -1,6 +1,6 @@
 # BlueHaven AI World
 
-BlueHaven AI World turns AI project operations into a living, isometric village. The visual language takes inspiration from strategy-game village builders (including the general village-building pattern of Clash of Clans), while the product, names, systems, and workflow are designed for BlueHaven's AI workspace.
+BlueHaven AI World turns AI project operations into a living, isometric village. The visual language takes inspiration from strategy-game village builders, while the product, names, systems, and workflow are designed for BlueHaven's AI workspace.
 
 ## Product direction
 
@@ -10,34 +10,57 @@ BlueHaven AI World turns AI project operations into a living, isometric village.
 - **AI Infrastructure:** Neon-backed persistence and an OpenAI-compatible model gateway.
 - **Village map:** a 3D overview with project buildings, moving builder units, orbit controls, and visible operational states.
 
-The village is a product interface, not a claim that a project is running just because an animation finished. Project creation is persisted through the API, and activation is gated by server-side gateway/model checks. Keep animation feedback separate from backend truth. The HQ and district landmarks are selectable; the Builder Hut opens the existing project workflow, while the Knowledge Archive clearly identifies document upload/indexing as not yet connected.
-
-
-BlueHaven AI World is an interactive isometric village for creating and operating AI projects. The village UI is built with Next.js App Router, TypeScript, Three.js, and React Three Fiber. Projects, construction jobs, and audit events persist in Neon Postgres.
+The village UI is not a claim that a project is running just because an animation finished. Project creation is persisted through the API, and activation is gated by server-side gateway/model checks. Projects, construction jobs, and audit events persist in Neon Postgres.
 
 ## Stack
 
 - Next.js 15 App Router + TypeScript
-- Three.js / React Three Fiber for the village viewport
-- `pathfinding` A* routing for builder units around occupied plot coordinates
-- Zustand for shared selected-district state between the map and district controls
+- Three.js / React Three Fiber
 - Neon Postgres through `@neondatabase/serverless`
-- OpenAI-compatible model gateway (OpenRouter by default; compatible self-hosted gateways can be used)
+- OpenAI-compatible model gateway (OpenRouter by default)
+
+## Vercel-native OmniRoute-compatible adapter
+
+The repository includes a Vercel Functions adapter at `/api/omniroute/v1/*`. It forwards supported OpenAI-compatible requests to a configured upstream provider while keeping provider credentials server-side. The BlueHaven agent runner can use it when `OMNIROUTE_VERCEL_NATIVE=true`.
+
+This is a **Vercel-compatible adapter, not the full upstream OmniRoute server**. It does not bundle OmniRoute's SQLite-backed management dashboard, provider catalog, key management, or all advanced routing/agent features. The upstream project expects persistent server data; Vercel Functions have a read-only filesystem except for temporary `/tmp` storage and bounded request durations. See [Vercel Function limits](https://vercel.com/docs/functions/limitations) and the [upstream OmniRoute API reference](https://github.com/diegosouzapw/OmniRoute/wiki/API-Reference).
+
+### Adapter endpoints
+
+- `GET /api/omniroute/health` — reports readiness without exposing credentials.
+- `GET /api/omniroute/v1/models`
+- `POST /api/omniroute/v1/chat/completions`
+- `POST /api/omniroute/v1/responses`
+- `POST /api/omniroute/v1/embeddings`
+- `POST /api/omniroute/v1/images/generations`
+- `POST /api/omniroute/v1/audio/transcriptions`
+- `POST /api/omniroute/v1/audio/speech`
+
+Incoming requests require `OMNIROUTE_API_KEY` or `AGENT_SERVICE_TOKEN`. Upstream requests use `OMNIROUTE_UPSTREAM_API_KEY`, `AI_GATEWAY_API_KEY`, or `OPENROUTER_API_KEY`. The upstream base URL defaults to `https://openrouter.ai/api/v1`; use HTTPS in production.
+
+### Enable it on Vercel
+
+1. Keep the existing production project and `main` branch; no extra branch is needed.
+2. In Vercel Project Settings → Environment Variables, set `OMNIROUTE_VERCEL_NATIVE=true`.
+3. Ensure `AGENT_SERVICE_TOKEN`, `AI_DEFAULT_MODEL`, and an upstream provider key are configured.
+4. Optionally set `OMNIROUTE_UPSTREAM_BASE_URL` to another OpenAI-compatible gateway.
+5. Deploy the latest `main` commit and test `/api/omniroute/health` and an authenticated model request.
+
+Do not set `AI_GATEWAY_BASE_URL` to this app's own `/api/omniroute/v1` URL; that can cause a proxy loop. The agent runner selects the local adapter when `OMNIROUTE_VERCEL_NATIVE=true`.
 
 ## Required environment
 
-Set these as server-side environment variables in Vercel or your local `.env.local`:
+Set these server-side environment variables in Vercel or local `.env.local`:
 
-- `DATABASE_URL`: Neon Postgres connection string for the BlueHaven AI World database.
-- `AI_GATEWAY_API_KEY`: API key for your chosen OpenAI-compatible model gateway.
+- `DATABASE_URL`: Neon Postgres connection string.
+- `AI_GATEWAY_API_KEY`: upstream model gateway key.
 - `AI_DEFAULT_MODEL`: model identifier available to that key.
-- `AGENT_SERVICE_TOKEN`: long random server-only token required for agent execution and task/hiring requests.
-- `MATTHEW_SERVICE_TOKEN`: separate server-only token for Matthew's hiring review actions.
-- `CHO_ADMIN_TOKEN`: separate server-only token for CHO task creation and final hiring decisions.
-- `CRON_SECRET`: server-only token used to authorize the scheduled daily brief job.
-- `AI_GATEWAY_BASE_URL`: gateway endpoint; defaults to `https://openrouter.ai/api/v1`.
+- `AGENT_SERVICE_TOKEN`: server-only token for agent execution and task/hiring requests.
+- `MATTHEW_SERVICE_TOKEN`, `CHO_ADMIN_TOKEN`: separate governance tokens.
+- `CRON_SECRET`: token authorizing scheduled jobs.
+- `AI_GATEWAY_BASE_URL`: upstream endpoint; defaults to `https://openrouter.ai/api/v1`.
 
-For OpenRouter, use a model ID available to your account. Never prefix secrets with `NEXT_PUBLIC_`, commit them to Git, or expose them in client code. `.env.example` contains names only.
+Never prefix secrets with `NEXT_PUBLIC_` or commit them to Git.
 
 ## Local development
 
@@ -47,28 +70,26 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Add the required values to `.env.local` before creating projects. The schema is already provisioned in the connected Neon database. To set up another database, run `psql "$DATABASE_URL" -f db/schema.sql` after setting the connection string.
+The schema is already provisioned in the connected Neon database. To set up another database, run `psql "$DATABASE_URL" -f db/schema.sql`.
 
 ## Current backend behavior
 
 - `GET /api/projects`: loads saved projects from Neon.
-- `POST /api/projects`: validates a project, allocates a currently free plot, and persists the project, queued job, and event.
+- `POST /api/projects`: validates a project, allocates a free plot, and persists the project, queued job, and event.
 - `GET /api/projects/:id`: returns project details, recent jobs, and events.
 - `PATCH /api/projects/:id`: pauses, resumes, or stops a project.
-- `POST /api/projects/:id/construction`: verifies gateway authentication and model availability without consuming inference tokens before marking a building operational; otherwise it records a clear failure state.
-- `POST /api/agents/run`: sends a prompt to the configured OpenAI-compatible chat-completions endpoint and records the outcome. Requires `Authorization: Bearer <AGENT_SERVICE_TOKEN>` and is not exposed as an unauthenticated browser action.
+- `POST /api/projects/:id/construction`: verifies gateway authentication and model availability before marking a building operational.
+- `POST /api/agents/run`: sends a prompt to the configured OpenAI-compatible endpoint and records the outcome. Requires `Authorization: Bearer <AGENT_SERVICE_TOKEN>`.
 
-- `GET /api/company`: loads the executive hierarchy, ten department heads, workers, task ledger, hiring queue, CHO notifications, connector status, and daily brief archive.
-- `POST /api/company`: authenticated task creation/completion and a two-stage hiring workflow. Agents request staff; Matthew reviews; only CHO approval creates an active worker. Matthew rejections generate a CHO notification.
-- `GET /api/company/brief`: generates and saves the full-day company brief for Africa/Lagos time. Vercel Cron is scheduled for 22:59 UTC (23:59 in Lagos); configure `CRON_SECRET` in Vercel for the scheduled request.
+- `GET /api/company`: loads the executive hierarchy, department heads, workers, task ledger, hiring queue, notifications, and daily brief archive.
+- `POST /api/company`: authenticated task creation/completion and two-stage hiring workflow.
+- `GET /api/company/brief`: saves the company brief for Africa/Lagos time. Vercel Cron is scheduled for 22:59 UTC; configure `CRON_SECRET`.
 
-The current agent runner is a single-turn model adapter, not yet a sandboxed autonomous tool-execution system. Browser, shell, GitHub, and deployment tools must be added as separately permissioned adapters before production use. Authentication and per-user authorization must also be added before exposing this service to multiple users.
+The current agent runner is a single-turn model adapter, not yet a sandboxed autonomous tool-execution system. Browser, shell, GitHub, and deployment tools must be added as separately permissioned adapters before production use. Add authentication and per-user authorization before exposing this service to multiple users.
 
 ## Company operating model
 
-The initial roster is CHO (human executive), Matthew (Chief of Staff), and ten AI department heads: Nova, Sage, Echo, Pixel, Forge, Scout, Atlas, Piper, Quinn, and Orbit. They share a connector identifier (`universal`) and use the centrally configured default model unless a department-specific model is configured. Connector identity is shared; provider access, pricing, and model availability still depend on the configured gateway.
-
-Workers are never auto-created from a request. A request enters `pending_matthew`; Matthew can forward it to `pending_cho` or reject it. Both outcomes notify CHO. Only a CHO-approved decision creates the worker record. Keep `AGENT_SERVICE_TOKEN`, `MATTHEW_SERVICE_TOKEN`, `CHO_ADMIN_TOKEN`, and `CRON_SECRET` as distinct random secrets in Vercel environment variables. The company dashboard at `/company` keeps the CHO token in page memory only; it is not persisted in browser storage.
+The initial roster is CHO (human executive), Matthew (Chief of Staff), and ten AI department heads: Nova, Sage, Echo, Pixel, Forge, Scout, Atlas, Piper, Quinn, and Orbit. Only a CHO-approved hiring decision creates an active worker record. Keep service and governance tokens separate.
 
 ## Build verification
 

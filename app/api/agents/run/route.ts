@@ -3,6 +3,7 @@ import { getSql } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const serviceToken = process.env.AGENT_SERVICE_TOKEN;
@@ -16,12 +17,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "projectId and an input of up to 12,000 characters are required." }, { status: 400 });
     }
 
-    const baseUrl = (process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, "");
-    const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY;
+    const useVercelAdapter = process.env.OMNIROUTE_VERCEL_NATIVE === "true";
+    const providerKey = process.env.OMNIROUTE_UPSTREAM_API_KEY
+      || process.env.AI_GATEWAY_API_KEY
+      || process.env.OPENROUTER_API_KEY;
+    const serviceBase = process.env.OMNIROUTE_VERCEL_BASE_URL
+      || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "")
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+    const baseUrl = useVercelAdapter
+      ? `${serviceBase.replace(/\/$/, "")}/api/omniroute/v1`
+      : (process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, "");
+    const apiKey = useVercelAdapter ? serviceToken : providerKey;
     const model = body.model || process.env.AI_DEFAULT_MODEL;
-    if (!apiKey || !model) {
+    if (!apiKey || !model || (useVercelAdapter && !serviceBase) || !providerKey) {
       return NextResponse.json({
-        error: "AI gateway is not configured. Add AI_GATEWAY_API_KEY and AI_DEFAULT_MODEL to the server environment.",
+        error: "AI gateway is not configured. Set AI_DEFAULT_MODEL and an upstream provider key. For the Vercel-native adapter, set OMNIROUTE_VERCEL_NATIVE=true and ensure Vercel provides VERCEL_PROJECT_PRODUCTION_URL or VERCEL_URL (or set OMNIROUTE_VERCEL_BASE_URL).",
         configurationRequired: true,
       }, { status: 503 });
     }
@@ -31,7 +41,7 @@ export async function POST(request: Request) {
     if (!rows.length) return NextResponse.json({ error: "Project not found." }, { status: 404 });
     const project = rows[0] as { id: string; name: string; purpose: string; status: string };
     if (project.status !== "active" && project.status !== "processing") {
-      return NextResponse.json({ error: `This building is ${project.status}. Activate it successfully before running the agent.` }, { status: 409 });
+      return NextResponse.json({ error: `This building is ${project.status}.` + " Activate it successfully before running the agent." }, { status: 409 });
     }
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -45,7 +55,7 @@ export async function POST(request: Request) {
         ],
         temperature: 0.3,
       }),
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(55000),
     });
     const payload = await response.json() as { choices?: { message?: { content?: string } }[]; error?: { message?: string } };
     if (!response.ok) {
