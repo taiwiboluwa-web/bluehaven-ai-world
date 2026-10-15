@@ -1089,3 +1089,21 @@ body { background: #0b1016; }
   .district-grid { grid-template-columns: 1fr; }
   .district-item { min-height: 0; }
 }
+
+
+/* Restore normal document flow around the immersive world; no viewport-sized absolute scene trapping content. */
+@media(min-width:761px) { .intro-row { padding-top: 104px; } }
+.world-section { position: relative; min-height: 0; padding: 24px clamp(18px,4vw,58px) 0; }
+.world-heading { display: flex; }
+.scene-wrap {
+  position: relative;
+  inset: auto;
+  height: clamp(420px, 52vw, 680px);
+  min-height: 0;
+  margin: 17px 0 0;
+}
+@media(max-width:760px) {
+  .world-section { min-height: 0; padding: 20px 16px 0; }
+  .world-heading { display: flex; }
+  .scene-wrap { position: relative; inset: auto; height: min(66svh,540px); min-height: 390px; margin-top: 14px; }
+}
