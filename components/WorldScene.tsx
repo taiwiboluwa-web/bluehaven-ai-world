@@ -32,12 +32,12 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
   const roofs=["#a94737","#355d7a","#7651a3","#b66c35","#367c70","#354a59"];
   const accents=["#f3c969","#80dcb6","#c2a5ff","#ffc45d","#6ed8e4","#f3d59a"];
   const wall=walls[kind%walls.length], roof=roofs[kind%roofs.length], accent=accents[kind%accents.length];
-  const Block=({p,s,color,r=.025,rough=.75,metal=0,emissive,glow=0}:{p:[number,number,number];s:[number,number,number];color:string;r?:number;rough?:number;metal?:number;emissive?:string;glow?:number})=><RoundedBox position={p} args={s} radius={r} smoothness={3} castShadow receiveShadow><Material color={color} roughness={rough} metalness={metal} emissive={emissive} emissiveIntensity={glow}/></RoundedBox>;
+  const Block=({p,s,color,r=.025,rough=.75,metal=0,emissive,glow=0,shadow=false}:{p:[number,number,number];s:[number,number,number];color:string;r?:number;rough?:number;metal?:number;emissive?:string;glow?:number;shadow?:boolean})=><RoundedBox position={p} args={s} radius={r} smoothness={3} castShadow={shadow} receiveShadow={shadow}><Material color={color} roughness={rough} metalness={metal} emissive={emissive} emissiveIntensity={glow}/></RoundedBox>;
   return <group position={position} scale={scale}>
     {/* Heavy layered foundation, with visible bevels and a warm metallic reveal. */}
-    <Block p={[0,.12,0]} s={[1.22,.22,1.13]} color="#8d9483" r={.055}/>
+    <Block p={[0,.12,0]} s={[1.22,.22,1.13]} color="#8d9483" r={.055} shadow/>
     <Block p={[0,.245,0]} s={[1.12,.065,1.04]} color="#e1cfaa" r={.025} rough={.62}/>
-    <Block p={[0,.65,0]} s={[.96,.75,.84]} color={wall} r={.055} rough={.86}/>
+    <Block p={[0,.65,0]} s={[.96,.75,.84]} color={wall} r={.055} rough={.86} shadow/>
     {/* Recessed glass curtain wall: separate panes, mullions and frame create real depth. */}
     <Block p={[0,.69,.426]} s={[.72,.54,.035]} color="#5a756e" r={.018} rough={.2} metal={.15} emissive="#3a7c7a" glow={.12}/>
     {[-.27,-.09,.09,.27].map((x,i)=><Block key={"glass-"+i} p={[x,.69,.45]} s={[.145,.46,.022]} color={i%2?"#86c9c5":"#6ca8b3"} r={.009} rough={.19} metal={.12} emissive="#4c9b9d" glow={.13}/>)}
@@ -54,7 +54,7 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
       <Block p={[x,.68,.496]} s={[.025,.15,.02]} color={accent} r={.006} emissive={accent} glow={.3}/>
     </group>)}
     {/* Roof slab, parapet, planted inset and mechanical equipment. */}
-    <Block p={[0,1.055,0]} s={[1.12,.15,1.0]} color={roof} r={.045} rough={.48} metal={.16}/>
+    <Block p={[0,1.055,0]} s={[1.12,.15,1.0]} color={roof} r={.045} rough={.48} metal={.16} shadow/>
     <Block p={[0,1.145,0]} s={[.86,.045,.75]} color="#628c59" r={.025} rough={.92}/>
     {[-.48,.48].map(x=><Block key={"parapet-x-"+x} p={[x,1.17,0]} s={[.075,.12,.94]} color={accent} r={.014} metal={.25}/>)}
     <Block p={[0,1.17,-.43]} s={[.96,.12,.07]} color={accent} r={.014} metal={.25}/>
@@ -65,7 +65,7 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
     {/* Tiny glowing rooftop beacon makes the building feel like an active game asset. */}
     <mesh position={[0,1.38,.05]} castShadow><cylinderGeometry args={[.035,.05,.09,8]}/><Material color="#d5c49d" metalness={.45} roughness={.3}/></mesh>
     <mesh position={[0,1.46,.05]} castShadow><icosahedronGeometry args={[.075,1]}/><Material color={accent} roughness={.22} metalness={.2} emissive={accent} emissiveIntensity={.9}/></mesh>
-    <Sparkles count={kind%3===1?5:3} position={[0,1.44,.05]} scale={[.3,.28,.3]} size={1.5} speed={.2} color={accent}/>
+    <Sparkles count={kind%3===1?3:2} position={[0,1.44,.05]} scale={[.3,.28,.3]} size={1.5} speed={.2} color={accent}/>
     {/* Side service panels and layered trim catch the key light as the camera orbits. */}
     <Block p={[-.493,.63,0]} s={[.035,.53,.42]} color={roof} r={.012} rough={.5}/>
     <Block p={[.493,.63,0]} s={[.035,.53,.42]} color={roof} r={.012} rough={.5}/>
