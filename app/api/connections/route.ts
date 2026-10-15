@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getSql } from "@/lib/db";
-import { isProviderConfigured, SOCIAL_PROVIDERS } from "@/lib/social-providers";
+import { isProviderConfigured, missingProviderConfiguration, SOCIAL_PROVIDERS } from "@/lib/social-providers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ export async function GET() {
         configured: isProviderConfigured(provider as keyof typeof SOCIAL_PROVIDERS),
         connected: connections.some((connection) => connection.status === "connected"),
         connections,
-        missingConfiguration: config.env.filter((key) => !process.env[key]),
+        missingConfiguration: missingProviderConfiguration(provider as keyof typeof SOCIAL_PROVIDERS),
       };
     });
     return NextResponse.json({
