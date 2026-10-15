@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   if (goal.length < 12 || goal.length > 6000) {
     return NextResponse.json({ error: "Describe the goal in 12–6,000 characters so the team has enough context." }, { status: 400 });
   }
-  const dispatchMode = body.dispatchMode === "manual" ? "manual" : "auto";
+  const dispatchMode = body.dispatchMode === "manual" || (!body.dispatchMode && Array.isArray(body.agentNames)) ? "manual" : "auto";
   const requestedNames = Array.isArray(body.agentNames) ? [...new Set(body.agentNames.map((n) => String(n).trim()))].slice(0, 4) : [];
 
   try {
