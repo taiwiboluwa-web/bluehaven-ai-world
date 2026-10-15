@@ -9,13 +9,14 @@ export const dynamic = "force-dynamic";
 const COOKIE = "bluehaven_social_admin";
 
 type PublishBody = { title?: string; content?: string; text?: string; labels?: string[]; blogId?: string; siteId?: string; idempotencyKey?: string; confirmPublish?: boolean };
+type ProviderJson = { [key: string]: unknown; error_description?: string; message?: string; error?: string; data?: { id?: string | number }; items?: { id?: string | number }[]; sites?: { ID?: string | number }[]; id?: string | number; url?: string; ID?: string | number; URL?: string };
 
 function hashPayload(provider: string, body: PublishBody) {
   return createHash("sha256").update(JSON.stringify({ provider, title: body.title || "", content: body.content || "", text: body.text || "", labels: body.labels || [], blogId: body.blogId || "", siteId: body.siteId || "" })).digest("hex");
 }
 
 async function jsonOrError(response: Response) {
-  const body = await response.json().catch(() => ({})) as Record<string, any>;
+  const body = await response.json().catch(() => ({})) as ProviderJson;
   if (!response.ok) {
     const message = typeof body.error_description === "string" ? body.error_description
       : typeof body.message === "string" ? body.message
