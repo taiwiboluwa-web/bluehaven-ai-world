@@ -67,7 +67,7 @@ a { color: inherit; }
 .profile { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; background: #1b2a31; color: var(--gold); font-weight: 800; }
 .company-hq-link { color: #e6d9b4; text-decoration: none; font: 9px var(--mono); letter-spacing: .06em; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 6px; white-space: nowrap; transition: background .2s, border-color .2s; }
 .company-hq-link:hover { background: rgba(243,201,105,.08); border-color: var(--gold); }
-.intro-row { display: flex; align-items: end; justify-content: space-between; gap: 40px; padding: clamp(36px, 5vw, 68px) 0 42px; }
+.intro-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; padding: clamp(36px, 5vw, 68px) 0 42px; }
 .kicker, .section-tag { color: #a7b9b0; font: 10px var(--mono); letter-spacing: .12em; }
 .kicker { display: flex; align-items: center; gap: 10px; margin: 0; text-transform: uppercase; }
 .kicker span { width: 26px; height: 2px; border-radius: 2px; background: var(--gold); }
@@ -90,7 +90,7 @@ h1 em, .wizard-modal h2 em { color: var(--gold); font-family: var(--display); fo
 .village-stats strong { font-size: clamp(25px, 2.6vw, 34px); line-height: 1; font-weight: 700; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
 .village-stats span { color: #9cafa6; font: 8px/1.6 var(--mono); letter-spacing: .06em; }
 .world-section { padding-top: 27px; border-top: 1px solid var(--line); }
-.world-heading, .project-heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+.world-heading, .project-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
 .world-heading h2, .project-heading h2 { margin: 7px 0 0; font-size: clamp(25px, 2.5vw, 32px); font-weight: 650; letter-spacing: -.055em; }
 .world-legend { display: flex; align-items: center; gap: 18px; color: #b7c5bc; font: 10px var(--mono); }
 .world-legend span { display: flex; align-items: center; gap: 8px; }
@@ -806,7 +806,7 @@ h1 em { color: #ffdf69; }
 
 /* BlueHaven AI World districts: readable landmarks between the 3D map and live roster. */
 .districts-section { padding: 26px 0 12px; }
-.districts-heading { display:flex; align-items:end; justify-content:space-between; gap:24px; margin-bottom:15px; }
+.districts-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:15px; }
 .districts-heading h2 { margin:6px 0 0; font-size:clamp(21px,2vw,27px); letter-spacing:-.04em; }
 .districts-heading > p { max-width:390px; margin:0; color:#b8cbb8; font-size:11px; line-height:1.7; }
 .district-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
