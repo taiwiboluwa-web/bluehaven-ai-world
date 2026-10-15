@@ -91,6 +91,15 @@ The current agent runner is a single-turn model adapter, not yet a sandboxed aut
 
 The initial roster is CHO (human executive), Matthew (Chief of Staff), and ten AI department heads: Nova, Sage, Echo, Pixel, Forge, Scout, Atlas, Piper, Quinn, and Orbit. Only a CHO-approved hiring decision creates an active worker record. Keep service and governance tokens separate.
 
+## Creator Command Center
+
+- `/creator-command-center` keeps the registered department agents available on standby and lets Atlas route a prompt to the best-fit specialists automatically.
+- `POST /api/company/orchestrate` supports `dispatchMode: "auto"`. If `agentNames` are supplied without a mode, the existing manual 2–4-agent selection remains compatible.
+- Automatic dispatch records the selected specialists and remaining standby roster in the mission response and audit payload. It falls back to a small keyword router if the model router returns invalid JSON.
+- `GET /api/creator/status` reports only whether expected provider credential names are present; it never returns secret values and does not equate credentials with a connected account.
+- `/api/creator/content` provides an authenticated, persistent draft queue in Neon. Draft creation is audit-logged. Publishing is intentionally disabled until provider-specific OAuth, token refresh, permission checks, delivery verification, and CHO approval gates are implemented and tested.
+- Social credential names currently checked: Meta (`META_APP_ID`, `META_APP_SECRET`, `META_ACCESS_TOKEN`), X (`X_CLIENT_ID`, `X_CLIENT_SECRET`, `X_ACCESS_TOKEN`), TikTok (`TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, `TIKTOK_ACCESS_TOKEN`), LinkedIn (`LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_ACCESS_TOKEN`), YouTube (`YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN`), and Pinterest (`PINTEREST_APP_ID`, `PINTEREST_APP_SECRET`, `PINTEREST_ACCESS_TOKEN`). These are readiness indicators, not completed OAuth integrations.
+
 ## Build verification
 
 ```bash
