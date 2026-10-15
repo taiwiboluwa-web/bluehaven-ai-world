@@ -94,7 +94,10 @@ export default function CreatorCommandCenter() {
   return <main style={{ minHeight: "100vh", background: "#0b0d11", color: "#f4f0e8", padding: "clamp(20px,5vw,64px)", fontFamily: "Arial,sans-serif" }}>
     <div style={{ maxWidth: 1200, margin: "0 auto" }}>
       <nav style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 14, borderBottom: "1px solid #2a2d33", paddingBottom: 20 }}>
-        <Link href="/company" style={{ color: "#ffde59", textDecoration: "none" }}>← COMPANY HQ</Link>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <Link href="/company" style={{ color: "#ffde59", textDecoration: "none" }}>← COMPANY HQ</Link>
+          <Link href="/connections" style={{ color: "#bcb0ff", textDecoration: "none" }}>Connect accounts & publish ↗</Link>
+        </div>
         <span style={{ color: "#9299a6", fontSize: 12, letterSpacing: 2 }}>BLUEHAVEN / CREATOR OPERATIONS</span>
       </nav>
       <header style={{ padding: "44px 0 28px", maxWidth: 850 }}>
@@ -147,7 +150,7 @@ export default function CreatorCommandCenter() {
         <div style={{ marginBottom: 14 }}><p style={{ color: "#ffde59", fontSize: 12, letterSpacing: 2 }}>03 / SOCIAL CONNECTIONS</p><h2>Publishing readiness</h2><p style={{ color: "#a9adb7", lineHeight: 1.6 }}>Credentials are checked without exposing their values. A credential is not treated as a connected account until OAuth, permissions, and a live test are verified.</p></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>{providers.map((provider) => <article key={provider.id} style={{ padding: 16, background: "#12151b", border: "1px solid #2b3038", borderRadius: 12 }}>
           <strong>{provider.label}</strong>
-          <p style={{ color: provider.status === "credentials_present_unverified" ? "#ffcf74" : "#9299a6", fontSize: 11, letterSpacing: 1 }}>{provider.status === "credentials_present_unverified" ? "CREDENTIALS DETECTED · UNVERIFIED" : "SETUP REQUIRED"}</p>
+          <p style={{ color: provider.status === "connected_verified" ? "#72d69a" : provider.status === "credentials_present_unverified" || provider.status === "connected_unverified" ? "#ffcf74" : "#9299a6", fontSize: 11, letterSpacing: 1 }}>{provider.status === "connected_verified" ? "ACCOUNT CONNECTED · IDENTITY VERIFIED" : provider.status === "connected_unverified" ? "OAUTH CONNECTED · TEST REQUIRED" : provider.status === "credentials_present_unverified" ? "APP CREDENTIALS PRESENT · ACCOUNT NOT VERIFIED" : provider.status === "reauthorization_required" ? "REAUTHORIZATION REQUIRED" : "SETUP REQUIRED"}</p>
           <p style={{ color: "#a9adb7", fontSize: 13, lineHeight: 1.5 }}>{provider.note}</p>
           {provider.missing.length > 0 && <details><summary style={{ cursor: "pointer", color: "#9c8bff", fontSize: 12 }}>Missing environment keys ({provider.missing.length})</summary><ul style={{ color: "#9299a6", fontSize: 12, paddingLeft: 18 }}>{provider.missing.map((name) => <li key={name}><code>{name}</code></li>)}</ul></details>}
         </article>)}</div>
