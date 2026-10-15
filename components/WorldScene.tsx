@@ -12,7 +12,7 @@ type Project = {
 };
 type DistrictId = "hq" | "builder" | "archive" | "infrastructure";
 type Props = { projects: Project[]; buildingId: string | null; onSelect: (id: string) => void; onDistrictSelect: (id: DistrictId) => void };
-const plots: [number, number][] = [[-3.2,-2.3],[3.1,-2.5],[-3.4,2.4],[3.25,2.45],[0,-4.1],[0,4.05],[-4.5,.1],[4.45,.15]];
+const plots: [number, number][] = [[-2,-1],[2,-1],[-2,2],[2,2],[0,-3],[0,3],[-4,0],[4,0],[-4,-3],[4,3],[-4,3],[4,-3],[0,5],[0,-5]];
 
 function Material({color,roughness=.85,metalness=0,emissive,emissiveIntensity=0}:{color:string;roughness?:number;metalness?:number;emissive?:string;emissiveIntensity?:number}) {
   return <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} emissive={emissive} emissiveIntensity={emissiveIntensity}/>;
@@ -20,11 +20,11 @@ function Material({color,roughness=.85,metalness=0,emissive,emissiveIntensity=0}
 function Tree({position,scale=1,autumn=false}:{position:[number,number,number];scale?:number;autumn?:boolean}) {
   const greens=autumn?["#9e7648","#bd965b","#d0aa6b"]:["#347448","#438b4f","#5aa65b"];
   return <group position={position} scale={scale}>
-    <mesh position={[0,.34,0]} castShadow><cylinderGeometry args={[.09,.15,.68,8]}/><Material color="#74503a"/></mesh>
-    <mesh position={[0,.83,0]} castShadow><icosahedronGeometry args={[.43,1]}/><Material color={greens[0]}/></mesh>
-    <mesh position={[-.22,1.02,.02]} castShadow><icosahedronGeometry args={[.31,1]}/><Material color={greens[1]}/></mesh>
-    <mesh position={[.2,1.03,-.05]} castShadow><icosahedronGeometry args={[.3,1]}/><Material color={greens[2]}/></mesh>
-    <mesh position={[0,1.26,0]} castShadow><icosahedronGeometry args={[.28,1]}/><Material color={greens[1]}/></mesh>
+    <mesh position={[0,.34,0]}><cylinderGeometry args={[.09,.15,.68,8]}/><Material color="#74503a"/></mesh>
+    <mesh position={[0,.83,0]}><icosahedronGeometry args={[.43,1]}/><Material color={greens[0]}/></mesh>
+    <mesh position={[-.22,1.02,.02]}><icosahedronGeometry args={[.31,1]}/><Material color={greens[1]}/></mesh>
+    <mesh position={[.2,1.03,-.05]}><icosahedronGeometry args={[.3,1]}/><Material color={greens[2]}/></mesh>
+    <mesh position={[0,1.26,0]}><icosahedronGeometry args={[.28,1]}/><Material color={greens[1]}/></mesh>
   </group>;
 }
 function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:number;scale?:number}) {
@@ -131,7 +131,7 @@ function HQ({onSelect}:{onSelect:(id:DistrictId)=>void}) {
     {[-.52,.52].map(x=><mesh key={x} position={[x,1.05,.715]}><boxGeometry args={[.28,.35,.035]}/><Material color="#7ebbc0" emissive="#345c62" emissiveIntensity={.3} roughness={.3}/></mesh>)}
     <mesh position={[0,2.02,0]}><cylinderGeometry args={[.035,.035,.55,8]}/><Material color="#d9c28a" metalness={.6}/></mesh>
     <mesh position={[0,2.25,0]}><octahedronGeometry args={[.13,0]}/><Material color="#ffda79" emissive="#dca83e" emissiveIntensity={1.1}/></mesh>
-    <Sparkles count={22} position={[0,1.7,0]} scale={[2.3,1.4,2.3]} size={2.2} speed={.25} color="#ffe6a3"/>
+    <Sparkles count={8} position={[0,1.7,0]} scale={[2.3,1.4,2.3]} size={2.2} speed={.25} color="#ffe6a3"/>
   </group>;
 }
 function Road({from,to,width=.55}:{from:[number,number];to:[number,number];width?:number}) {
@@ -149,7 +149,7 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
   return <group ref={ref} position={position} onClick={(e)=>{e.stopPropagation();onSelect(project.id)}}>
     <mesh position={[0,.06,0]} castShadow receiveShadow><cylinderGeometry args={[.85,.92,.16,8]}/><Material color={building?"#bd8c47":"#8b9278"}/></mesh>
     <mesh position={[0,.15,0]}><ringGeometry args={[.72,.8,8]}/><meshBasicMaterial color={tone} transparent opacity={.8}/></mesh>
-    {building?<><mesh position={[0,.72,0]} castShadow><boxGeometry args={[1,1.05,1]}/><meshStandardMaterial color="#e7c982" wireframe transparent opacity={.55}/></mesh><mesh position={[0,1.27,0]}><boxGeometry args={[1.12,.07,1.12]}/><Material color="#d2a85c"/></mesh><Sparkles count={20} scale={1.55} size={2.4} speed={.8} color="#ffdf79"/></>:<><House position={[0,.14,0]} kind={index+1} scale={.82}/><mesh position={[0,1.57,0]}><sphereGeometry args={[.065,12,12]}/><meshBasicMaterial color={tone}/></mesh><Sparkles count={project.status==="active"?7:3} scale={[.8,.3,.8]} position={[0,1.45,0]} size={1.6} speed={.22} color={tone}/></>}
+    {building?<><mesh position={[0,.72,0]} castShadow><boxGeometry args={[1,1.05,1]}/><meshStandardMaterial color="#e7c982" wireframe transparent opacity={.55}/></mesh><mesh position={[0,1.27,0]}><boxGeometry args={[1.12,.07,1.12]}/><Material color="#d2a85c"/></mesh><Sparkles count={20} scale={1.55} size={2.4} speed={.8} color="#ffdf79"/></>:<><House position={[0,.14,0]} kind={index+1} scale={.82}/><mesh position={[0,1.57,0]}><sphereGeometry args={[.065,12,12]}/><meshBasicMaterial color={tone}/></mesh><Sparkles count={project.status==="active"?3:1} scale={[.8,.3,.8]} position={[0,1.45,0]} size={1.6} speed={.22} color={tone}/></>}
   </group>;
 }
 function DistrictBuilding({position,kind,label,onSelect}:{position:[number,number,number];kind:number;label:string;onSelect:(id:DistrictId)=>void}) {
@@ -165,7 +165,7 @@ function DistrictBuilding({position,kind,label,onSelect}:{position:[number,numbe
   </group>;
 }
 function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
-  const forest=useMemo(()=>Array.from({length:56},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
+  const forest=useMemo(()=>Array.from({length:36},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
   const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
   const obstacles=useMemo<[number,number][]>(()=>[...projects.map((p,i)=>[typeof p.gridX==="number"?p.gridX:plots[i%plots.length][0],typeof p.gridZ==="number"?p.gridZ:plots[i%plots.length][1]] as [number,number]),[0,0],[0,-6.05],[-6.05,0],[6.05,0]], [projects]);
   return <group>
@@ -191,14 +191,14 @@ function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project
     <Agent start={[-1.5,.05,-1.2]} destination={[-3.9,-2.3]} obstacles={obstacles} color="#f3c969" phase={0}/>
     <Agent start={[1.7,.05,1.2]} destination={[3.8,-2.5]} obstacles={obstacles} color="#8ce0b0" phase={2.3}/>
     <Agent start={[-1.2,.05,1.6]} destination={[-4.1,2.4]} obstacles={obstacles} color="#a9a1ff" phase={4.4}/>
-    <ContactShadows position={[0,-.02,0]} opacity={.18} scale={19} blur={1.7} far={4.5} resolution={256}/>
+    <ContactShadows position={[0,-.02,0]} opacity={.18} scale={19} blur={1.7} far={4.5} resolution={128}/>
   </group>;
 }
 export default function WorldScene({projects,buildingId,onSelect,onDistrictSelect}:Props) {
   return <Canvas shadows dpr={[1,1.1]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance", stencil:false}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
     <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
     <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
-    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={512} shadow-mapSize-height={512} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
+    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={256} shadow-mapSize-height={256} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
     <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect} onDistrictSelect={onDistrictSelect}/></Float></Suspense>
     <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={17} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
   </Canvas>;
