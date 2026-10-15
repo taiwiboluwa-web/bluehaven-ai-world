@@ -76,7 +76,11 @@ export default function ConnectionsPage() {
       const response = await fetch(`/api/connections/test/${provider}`, { method: "POST" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Connection test failed.");
-      setTestResults((old) => ({ ...old, [provider]: `Identity verified${result.accountLabel ? `: ${result.accountLabel}` : ""}. Publishing has not been tested.` }));
+      const googleServices = result.services as { blogger?: { count?: number }; youtube?: { count?: number } } | undefined;
+      const verifiedMessage = provider === "google" && googleServices
+        ? `Google identity verified${result.accountLabel ? `: ${result.accountLabel}` : ""}. Blogger API verified (${googleServices.blogger?.count ?? 0} blogs); YouTube API verified (${googleServices.youtube?.count ?? 0} channels). Publishing/uploading has not been tested.`
+        : `Identity verified${result.accountLabel ? `: ${result.accountLabel}` : ""}. Publishing has not been tested.`;
+      setTestResults((old) => ({ ...old, [provider]: verifiedMessage }));
       await refresh();
     } catch (e) { setTestResults((old) => ({ ...old, [provider]: e instanceof Error ? e.message : "Connection test failed." })); }
     finally { setTestingProvider(""); }
