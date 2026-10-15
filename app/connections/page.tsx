@@ -28,6 +28,12 @@ export default function ConnectionsPage() {
   const [notice, setNotice] = useState("");
   const [testingProvider, setTestingProvider] = useState("");
   const [testResults, setTestResults] = useState<Record<string, string>>({});
+  const [publishProvider, setPublishProvider] = useState("x");
+  const [publishTitle, setPublishTitle] = useState("");
+  const [publishContent, setPublishContent] = useState("");
+  const [confirmPublish, setConfirmPublish] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishResult, setPublishResult] = useState("");
 
   const refresh = useCallback(async () => {
     const response = await fetch("/api/connections", { cache: "no-store" });
@@ -76,6 +82,28 @@ export default function ConnectionsPage() {
     finally { setTestingProvider(""); }
   }
 
+  async function publishPost(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!confirmPublish) { setError("Confirm that you understand this will publish live."); return; }
+    setPublishing(true); setError(""); setPublishResult("");
+    try {
+      const idempotencyKey = crypto.randomUUID().replaceAll("-", "");
+      const payload = publishProvider === "x"
+        ? { text: publishContent, idempotencyKey, confirmPublish: true }
+        : { title: publishTitle, content: publishContent, idempotencyKey, confirmPublish: true };
+      const response = await fetch("/api/connections/publish/" + publishProvider, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Publishing failed.");
+      const urlText = result.publishedUrl || (result.remotePostId ? "https://x.com/i/web/status/" + result.remotePostId : "");
+      setPublishResult("Published successfully" + (urlText ? ": " + urlText : "") + ". Receipt: " + result.receiptKey);
+      setPublishContent(""); setPublishTitle(""); setConfirmPublish(false);
+      await refresh();
+    } catch (e) { setPublishResult(e instanceof Error ? e.message : "Publishing failed."); }
+    finally { setPublishing(false); }
+  }
+
   async function signOut() {
     await fetch("/api/connections/session", { method: "DELETE" });
     setSignedIn(false); setData(null); setAdminToken("");
@@ -120,8 +148,26 @@ export default function ConnectionsPage() {
           </article>;
         })}</div>
       </section>
+      <section className="connections-section live-publish-section">
+        <div className="connections-section-heading"><div><div className="connections-section-label">02 / CONTROLLED LIVE PUBLISHING</div><h2>Send a real test post</h2></div><p>Currently supported here: X text posts, Blogger articles and WordPress.com articles. This publishes immediately, not as a draft.</p></div>
+        <form className="live-publish-form" onSubmit={publishPost}>
+          <label htmlFor="publish-provider">Destination</label>
+          <select id="publish-provider" value={publishProvider} onChange={(event) => { setPublishProvider(event.target.value); setConfirmPublish(false); }}>
+            <option value="x">X — short post</option>
+            <option value="google">Blogger — article</option>
+            <option value="wordpress">WordPress.com — article</option>
+          </select>
+          {publishProvider !== "x" && <><label htmlFor="publish-title">Article title</label><input id="publish-title" value={publishTitle} onChange={(event) => setPublishTitle(event.target.value)} required maxLength={500} /></>}
+          <label htmlFor="publish-content">{publishProvider === "x" ? "Post text (max 280 characters)" : "Article content (HTML supported by destination)"}</label>
+          <textarea id="publish-content" value={publishContent} onChange={(event) => setPublishContent(event.target.value)} required maxLength={publishProvider === "x" ? 280 : 100000} rows={publishProvider === "x" ? 4 : 8} />
+          <label className="publish-confirm"><input type="checkbox" checked={confirmPublish} onChange={(event) => setConfirmPublish(event.target.checked)} /> I understand this will publish publicly to the selected account immediately.</label>
+          <button type="submit" disabled={publishing || !data?.providers.find((provider) => provider.provider === publishProvider)?.connected || !confirmPublish}>{publishing ? "Publishing…" : "Publish live post"}</button>
+          {!data?.providers.find((provider) => provider.provider === publishProvider)?.connected && <p className="publish-help">Connect and test this destination above before publishing.</p>}
+          {publishResult && <div className="publish-result" role="status">{publishResult}</div>}
+        </form>
+      </section>
       <section className="connections-section extra-section">
-        <div className="connections-section-heading"><div><div className="connections-section-label">02 / DRAFT HANDOFFS + COMMERCE</div><h2>Other useful destinations</h2></div><p>These are deliberately separated from direct social publishing where a supported API is unavailable.</p></div>
+        <div className="connections-section-heading"><div><div className="connections-section-label">03 / DRAFT HANDOFFS + COMMERCE</div><h2>Other useful destinations</h2></div><p>These are deliberately separated from direct social publishing where a supported API is unavailable.</p></div>
         <div className="unsupported-grid">{(data?.unsupported || []).map((item) => <article className="unsupported-card" key={item.provider}><div><h3>{item.label}</h3><span>{item.mode.replaceAll("_", " ")}</span></div><p>{item.note}</p></article>)}</div>
       </section>
     </>}
