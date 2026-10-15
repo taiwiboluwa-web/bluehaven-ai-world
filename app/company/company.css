@@ -5,3 +5,40 @@
 
 .company-command-link{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border:1px solid #7f56d6;border-radius:7px;color:#d8caff;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap}.company-command-link:hover{background:#241c39;border-color:#a28aff}
 @media(max-width:600px){.company-command-link{font-size:9px;padding:8px}}
+
+
+/* Shared BlueHaven visual language: deliberate hierarchy, quieter chrome, real mobile fit. */
+:root { --c-gold: #ffde59; --c-violet: #7f56d6; --c-line: rgba(235,231,245,.14); }
+.company-shell { max-width: 1640px; margin-inline: auto; }
+.company-topbar { border-bottom-color: rgba(255,255,255,.12); }
+.company-brand span, .company-brand strong { color: #ffde59; }
+.company-live { color: #bdb4d1; }
+.company-command-link { border-radius: 3px; border-color: rgba(127,86,214,.75); color: #d9caff; transition: background .18s,border-color .18s; }
+.company-command-link:hover { background: rgba(127,86,214,.12); border-color: #b29bff; }
+.company-metrics { border-color: var(--c-line); background: rgba(255,255,255,.012); }
+.company-metrics>div { border-color: var(--c-line); }
+.company-section-head h2 { letter-spacing: -.045em; }
+.leader-card, .department-card, .task-form, .task-ledger, .hiring-list, .notification-list {
+  box-shadow: none;
+  border-color: var(--c-line);
+}
+.leader-card { background: linear-gradient(120deg,rgba(127,86,214,.055),transparent 68%),rgba(20,19,28,.8); }
+.cho-card { border-top-color: var(--c-gold); }
+.department-card { background: rgba(20,19,28,.58); transition: border-color .18s ease, background .18s ease; }
+.department-card:hover { background: rgba(127,86,214,.07); border-color: rgba(127,86,214,.65); }
+.department-avatar { border-color: rgba(127,86,214,.48); color: #d2c3ff; background: rgba(127,86,214,.08); }
+.task-form, .task-ledger, .hiring-list, .notification-list { background: rgba(20,19,28,.55); }
+.task-form input:focus, .task-form textarea:focus, .task-form select:focus { border-color: rgba(127,86,214,.8); }
+.company-primary-button { background: var(--c-gold); border-radius: 3px; }
+.company-alert, .company-notice { border-radius: 3px; }
+@media(max-width:720px) {
+  .company-topbar { gap: 12px; }
+  .company-top-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .company-metrics>div { padding: 16px 13px; }
+  .company-metrics strong { font-size: 27px; }
+  .task-form, .task-ledger, .hiring-list, .notification-list { padding: 16px; }
+  .department-grid { gap: 8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .department-card, .company-command-link { transition: none !important; }
+}
