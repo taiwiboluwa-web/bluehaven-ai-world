@@ -93,7 +93,8 @@ export async function POST(request: Request, context: { params: Promise<{ provid
       if (!blogId) {
         const blogsResponse = await fetch("https://www.googleapis.com/blogger/v3/users/self/blogs", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
         const blogs = await jsonOrError(blogsResponse);
-        blogId = blogs.items?.[0]?.id ? String(blogs.items[0].id) : undefined;
+        const firstBlog = blogs.items?.[0];
+        blogId = firstBlog?.id ? String(firstBlog.id) : undefined;
       }
       if (!blogId) throw new Error("No Blogger blog was found for this Google account. Create a Blogger blog first.");
       const postResponse = await fetch(`https://www.googleapis.com/blogger/v3/blogs/${encodeURIComponent(blogId)}/posts/`, {
@@ -112,7 +113,8 @@ export async function POST(request: Request, context: { params: Promise<{ provid
       if (!siteId) {
         const sitesResponse = await fetch("https://public-api.wordpress.com/rest/v1.1/me/sites", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
         const sites = await jsonOrError(sitesResponse);
-        siteId = sites.sites?.[0]?.ID ? String(sites.sites[0].ID) : "";
+        const firstSite = sites.sites?.[0];
+        siteId = firstSite?.ID ? String(firstSite.ID) : "";
       }
       if (!siteId) throw new Error("No WordPress.com site was found for this account. Create or connect a site first.");
       const form = new URLSearchParams({ title: body.title!.trim(), content: text, status: "publish" });
