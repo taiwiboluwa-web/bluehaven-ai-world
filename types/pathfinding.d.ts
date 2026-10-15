@@ -8,10 +8,12 @@ declare module "pathfinding" {
     constructor(width: number, height: number);
     setWalkableAt(x: number, y: number, walkable: boolean): void;
   }
-  class AStarFinder {
-    constructor(options?: FinderOptions);
+  type AStarFinderInstance = {
     findPath(startX: number, startY: number, endX: number, endY: number, grid: Grid): Point[];
-  }
-  const PF: { Grid: typeof Grid; AStarFinder: typeof AStarFinder };
+  };
+  const PF: {
+    Grid: typeof Grid;
+    AStarFinder: new (options?: FinderOptions) => AStarFinderInstance;
+  };
   export default PF;
 }
