@@ -33,7 +33,7 @@ export async function POST(request: Request, context: { params: Promise<{ provid
   if (!expected || jar.get(COOKIE)?.value !== expected) return NextResponse.json({ error: "Sign in to publish from BlueHaven." }, { status: 401 });
   const { provider } = await context.params;
   if (!isSocialProvider(provider)) return NextResponse.json({ error: "Unsupported provider." }, { status: 404 });
-  if (!["x", "google", "wordpress"].includes(provider)) {
+  if (!["x", "linkedin", "google", "wordpress"].includes(provider)) {
     return NextResponse.json({ error: "Direct publishing is not yet implemented for this provider. No post was sent.", provider, status: "adapter_pending" }, { status: 501 });
   }
 
@@ -44,7 +44,7 @@ export async function POST(request: Request, context: { params: Promise<{ provid
   const text = (provider === "x" ? body.text : body.content)?.trim() || "";
   if (!text) return NextResponse.json({ error: provider === "x" ? "Post text is required." : "Article content is required." }, { status: 400 });
   if (provider === "x" && text.length > 280) return NextResponse.json({ error: "X post text must be no longer than 280 characters in this initial publisher." }, { status: 400 });
-  if (provider !== "x" && !body.title?.trim()) return NextResponse.json({ error: "Article title is required." }, { status: 400 });
+  if (!["x", "linkedin"].includes(provider) && !body.title?.trim()) return NextResponse.json({ error: "Article title is required." }, { status: 400 });
   if (text.length > 100000 || (body.title || "").length > 500) return NextResponse.json({ error: "Content exceeds the allowed length." }, { status: 400 });
 
   const payloadHash = hashPayload(provider, body);
@@ -88,6 +88,34 @@ export async function POST(request: Request, context: { params: Promise<{ provid
       if (!remotePostId) throw new Error("X did not return a post ID.");
       publishedUrl = `https://x.com/i/web/status/${remotePostId}`;
       summary = { text: text.slice(0, 280), response: { id: remotePostId } };
+    } else if (provider === "linkedin") {
+      const accountId = String(tokenRow.capabilities?.remoteAccountId || "");
+      if (!accountId) throw new Error("Run Test connection again so BlueHaven can verify the LinkedIn member ID.");
+      const author = accountId.startsWith("urn:li:person:") ? accountId : `urn:li:person:${accountId}`;
+      const response = await fetch("https://api.linkedin.com/rest/posts", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "X-Restli-Protocol-Version": "2.0.0",
+          "LinkedIn-Version": process.env.LINKEDIN_API_VERSION || "202610",
+        },
+        body: JSON.stringify({
+          author,
+          commentary: text,
+          visibility: "PUBLIC",
+          distribution: { feedDistribution: "MAIN_FEED", targetEntities: [], thirdPartyDistributionChannels: [] },
+          lifecycleState: "PUBLISHED",
+          isReshareDisabledByAuthor: false,
+        }),
+        cache: "no-store",
+      });
+      if (!response.ok) await jsonOrError(response);
+      const post = await response.json().catch(() => ({})) as ProviderJson;
+      remotePostId = response.headers.get("x-restli-id") || String(post.id || post.data?.id || "");
+      if (!remotePostId) throw new Error("LinkedIn did not return a post ID; verify the app's Community Management access and w_member_social permission.");
+      publishedUrl = `https://www.linkedin.com/feed/update/${remotePostId}`;
+      summary = { text: text.slice(0, 5000), author, postId: remotePostId };
     } else if (provider === "google") {
       let blogId = body.blogId;
       if (!blogId) {
