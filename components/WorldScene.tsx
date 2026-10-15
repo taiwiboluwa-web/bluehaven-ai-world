@@ -212,7 +212,7 @@ export default function WorldScene({projects,buildingId,onSelect,onDistrictSelec
 
   return <div ref={hostRef} style={{width:"100%",height:"100%"}}>
     <Canvas frameloop={visible ? "always" : "never"} dpr={[0.7,1]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance", stencil:false}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
-      <color attach="background" args={["#a8d7ec",1]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
+      <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
       <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
       <directionalLight position={[7,13,5]} intensity={2.1} castShadow={false} shadow-mapSize-width={128} shadow-mapSize-height={256} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
       <Suspense fallback={null}><World projects={projects} buildingId={buildingId} onSelect={onSelect} onDistrictSelect={onDistrictSelect}/></Suspense>
