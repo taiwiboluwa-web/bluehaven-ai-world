@@ -93,8 +93,9 @@ export default function Home() {
       setPlotChoice("auto");
       setShowWizard(false);
 
-      // The animation window is followed by a real backend/gateway health check.
-      window.setTimeout(async () => {
+      // Start real provisioning immediately; keep the visual construction cue independent.
+      window.setTimeout(() => setBuildingId((current) => current === created.id ? null : current), 2600);
+      void (async () => {
         try {
           const result = await fetch(`/api/projects/${created.id}/construction`, { method: "POST" });
           const resultData = await result.json();
@@ -102,10 +103,9 @@ export default function Home() {
         } catch {
           setActionError("The construction service could not be reached. Refresh to check the saved project.");
         } finally {
-          setBuildingId((current) => current === created.id ? null : current);
           await refreshProjects();
         }
-      }, 7000);
+      })();
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "Project creation failed.");
     } finally {
