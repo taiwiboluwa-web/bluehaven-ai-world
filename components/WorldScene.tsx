@@ -70,7 +70,7 @@ function House({position,kind=0,scale=1}:{position:[number,number,number];kind?:
     {/* Tiny glowing rooftop beacon makes the building feel like an active game asset. */}
     <mesh position={[0,1.38,.05]} castShadow><cylinderGeometry args={[.035,.05,.09,8]}/><Material color="#d5c49d" metalness={.45} roughness={.3}/></mesh>
     <mesh position={[0,1.46,.05]} castShadow><icosahedronGeometry args={[.075,1]}/><Material color={accent} roughness={.22} metalness={.2} emissive={accent} emissiveIntensity={.9}/></mesh>
-    <Sparkles count={kind%3===1?3:2} position={[0,1.44,.05]} scale={[.3,.28,.3]} size={1.5} speed={.2} color={accent}/>
+    <Sparkles count={kind%3===1?1:0} position={[0,1.44,.05]} scale={[.3,.28,.3]} size={1.5} speed={.2} color={accent}/>
     {/* Side service panels and layered trim catch the key light as the camera orbits. */}
     <Block p={[-.493,.63,0]} s={[.035,.53,.42]} color={roof} r={.012} rough={.5}/>
     <Block p={[.493,.63,0]} s={[.035,.53,.42]} color={roof} r={.012} rough={.5}/>
@@ -136,7 +136,7 @@ function HQ({onSelect}:{onSelect:(id:DistrictId)=>void}) {
     {[-.52,.52].map(x=><mesh key={x} position={[x,1.05,.715]}><boxGeometry args={[.28,.35,.035]}/><Material color="#7ebbc0" emissive="#345c62" emissiveIntensity={.3} roughness={.3}/></mesh>)}
     <mesh position={[0,2.02,0]}><cylinderGeometry args={[.035,.035,.55,8]}/><Material color="#d9c28a" metalness={.6}/></mesh>
     <mesh position={[0,2.25,0]}><octahedronGeometry args={[.13,0]}/><Material color="#ffda79" emissive="#dca83e" emissiveIntensity={1.1}/></mesh>
-    <Sparkles count={8} position={[0,1.7,0]} scale={[2.3,1.4,2.3]} size={2.2} speed={.25} color="#ffe6a3"/>
+    <Sparkles count={3} position={[0,1.7,0]} scale={[2.3,1.4,2.3]} size={2.2} speed={.25} color="#ffe6a3"/>
   </group>;
 }
 function Road({from,to,width=.55}:{from:[number,number];to:[number,number];width?:number}) {
@@ -154,7 +154,7 @@ function ProjectBuilding({position,project,index,onSelect,building}:{position:[n
   return <group ref={ref} position={position} onClick={(e)=>{e.stopPropagation();onSelect(project.id)}}>
     <mesh position={[0,.06,0]} castShadow receiveShadow><cylinderGeometry args={[.85,.92,.16,8]}/><Material color={building?"#bd8c47":"#8b9278"}/></mesh>
     <mesh position={[0,.15,0]}><ringGeometry args={[.72,.8,8]}/><meshBasicMaterial color={tone} transparent opacity={.8}/></mesh>
-    {building?<><mesh position={[0,.72,0]} castShadow><boxGeometry args={[1,1.05,1]}/><meshStandardMaterial color="#e7c982" wireframe transparent opacity={.55}/></mesh><mesh position={[0,1.27,0]}><boxGeometry args={[1.12,.07,1.12]}/><Material color="#d2a85c"/></mesh><Sparkles count={20} scale={1.55} size={2.4} speed={.8} color="#ffdf79"/></>:<><House position={[0,.14,0]} kind={index+1} scale={.82}/><mesh position={[0,1.57,0]}><sphereGeometry args={[.065,12,12]}/><meshBasicMaterial color={tone}/></mesh><Sparkles count={project.status==="active"?3:1} scale={[.8,.3,.8]} position={[0,1.45,0]} size={1.6} speed={.22} color={tone}/></>}
+    {building?<><mesh position={[0,.72,0]} castShadow><boxGeometry args={[1,1.05,1]}/><meshStandardMaterial color="#e7c982" wireframe transparent opacity={.55}/></mesh><mesh position={[0,1.27,0]}><boxGeometry args={[1.12,.07,1.12]}/><Material color="#d2a85c"/></mesh><Sparkles count={8} scale={1.55} size={2.4} speed={.8} color="#ffdf79"/></>:<><House position={[0,.14,0]} kind={index+1} scale={.82}/><mesh position={[0,1.57,0]}><sphereGeometry args={[.065,12,12]}/><meshBasicMaterial color={tone}/></mesh><Sparkles count={project.status==="active"?1:0} scale={[.8,.3,.8]} position={[0,1.45,0]} size={1.6} speed={.22} color={tone}/></>}
   </group>;
 }
 function DistrictBuilding({position,kind,label,onSelect}:{position:[number,number,number];kind:number;label:string;onSelect:(id:DistrictId)=>void}) {
@@ -166,11 +166,11 @@ function DistrictBuilding({position,kind,label,onSelect}:{position:[number,numbe
     <House position={[0,.1,0]} kind={kind} scale={.9}/>
     <mesh position={[0,1.88,.03]}><boxGeometry args={[.92,.23,.07]}/><Material color="#24452f" metalness={.2}/></mesh>
     <mesh position={[0,1.88,.073]}><boxGeometry args={[.76,.035,.012]}/><Material color={accent} emissive={accent} emissiveIntensity={.8}/></mesh>
-    <Sparkles count={7} position={[0,1.7,0]} scale={[1.15,.5,1.15]} size={1.7} speed={.25} color={accent}/>
+    <Sparkles count={2} position={[0,1.7,0]} scale={[1.15,.5,1.15]} size={1.7} speed={.25} color={accent}/>
   </group>;
 }
 function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project[];buildingId:string|null;onSelect:(id:string)=>void;onDistrictSelect:(id:DistrictId)=>void}) {
-  const forest=useMemo(()=>Array.from({length:36},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
+  const forest=useMemo(()=>Array.from({length:20},(_,i)=>{const a=i*2.399;const r=7.5+(i%4)*.45;return {x:Math.cos(a)*r,z:Math.sin(a)*r,s:.62+(i%5)*.095};}),[]);
   const occupied=projects.map((p,i)=>({p,i,plot:plots[i%plots.length]}));
   const obstacles=useMemo<[number,number][]>(()=>[...projects.map((p,i)=>[typeof p.gridX==="number"?p.gridX:plots[i%plots.length][0],typeof p.gridZ==="number"?p.gridZ:plots[i%plots.length][1]] as [number,number]),[0,0],[0,-6.05],[-6.05,0],[6.05,0]], [projects]);
   return <group>
@@ -194,15 +194,14 @@ function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project
     {occupied.map(({p,i,plot})=>{const x=typeof p.gridX==="number"?p.gridX:plot[0];const z=typeof p.gridZ==="number"?p.gridZ:plot[1];const building=p.id===buildingId||["under_construction","initializing"].includes(p.status);return <ProjectBuilding key={p.id} position={[x,.02,z]} project={p} index={i} onSelect={onSelect} building={building}/>;})}
     {[[ -5.7,-5.3], [5.65,-5.4],[-5.7,5.3],[5.65,5.4]].map((p,i)=><group key={i} position={[p[0],0,p[1]]}><mesh position={[0,.3,0]} castShadow><cylinderGeometry args={[.12,.16,.6,8]}/><Material color="#b9a16d" metalness={.35}/></mesh><mesh position={[0,.65,0]}><sphereGeometry args={[.13,12,10]}/><Material color="#ffe6a0" emissive="#ffcf62" emissiveIntensity={1.2}/></mesh><pointLight position={[0,.75,0]} color="#ffd887" intensity={.45} distance={2}/></group>)}
     {AGENT_ROUTES.map((route) => <Agent key={route.color} start={route.start} destination={route.destination} obstacles={obstacles} color={route.color} phase={route.phase}/> )}
-    <ContactShadows position={[0,-.02,0]} opacity={.18} scale={19} blur={1.7} far={4.5} resolution={128}/>
   </group>;
 }
 export default function WorldScene({projects,buildingId,onSelect,onDistrictSelect}:Props) {
-  return <Canvas shadows dpr={[1,1.1]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance", stencil:false}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
+  return <Canvas dpr={[0.7,1]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance", stencil:false}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
     <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
     <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
-    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={256} shadow-mapSize-height={256} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
-    <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect} onDistrictSelect={onDistrictSelect}/></Float></Suspense>
+    <directionalLight position={[7,13,5]} intensity={2.1} castShadow={false} shadow-mapSize-width={128} shadow-mapSize-height={256} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
+    <Suspense fallback={null}><World projects={projects} buildingId={buildingId} onSelect={onSelect} onDistrictSelect={onDistrictSelect}/></Suspense>
     <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={17} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
   </Canvas>;
 }
