@@ -46,12 +46,28 @@ export async function POST(request: Request, context: { params: Promise<{ provid
   const text = (provider === "x" ? body.text : body.content)?.trim() || "";
   if (!text) return NextResponse.json({ error: provider === "x" ? "Post text is required." : "Article content is required." }, { status: 400 });
   if (provider === "x" && text.length > 280) return NextResponse.json({ error: "X post text must be no longer than 280 characters in this initial publisher." }, { status: 400 });
+  if (provider === "linkedin" && text.length > 3000) return NextResponse.json({ error: "LinkedIn text posts must be no longer than 3,000 characters." }, { status: 400 });
   if (!["x", "linkedin"].includes(provider) && !body.title?.trim()) return NextResponse.json({ error: "Article title is required." }, { status: 400 });
   if (text.length > 100000 || (body.title || "").length > 500) return NextResponse.json({ error: "Content exceeds the allowed length." }, { status: 400 });
 
   const payloadHash = hashPayload(provider, body);
   try {
     const sql = getSql();
+    await sql`CREATE TABLE IF NOT EXISTS social_publication_receipts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      provider TEXT NOT NULL,
+      idempotency_key TEXT NOT NULL,
+      payload_hash TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'started' CHECK (status IN ('started','published','failed')),
+      remote_post_id TEXT,
+      published_url TEXT,
+      response_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
+      error_message TEXT,
+      attempted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      completed_at TIMESTAMPTZ,
+      UNIQUE(provider, idempotency_key)
+    )`;
+    await sql`CREATE INDEX IF NOT EXISTS social_publication_receipts_provider_idx ON social_publication_receipts(provider, attempted_at DESC)`;
     const tokenRows = await sql`SELECT access_token_ciphertext, expires_at, status, capabilities FROM social_provider_tokens WHERE provider = ${provider} AND account_id = 'default' LIMIT 1`;
     if (!tokenRows.length) return NextResponse.json({ error: "Connect and test this provider before publishing." }, { status: 409 });
     const tokenRow = tokenRows[0] as { access_token_ciphertext: string; expires_at: string | null; status: string; capabilities: Record<string, unknown> };
