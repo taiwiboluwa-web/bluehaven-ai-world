@@ -8,8 +8,8 @@
 ## Executive summary
 
 - Clean install completed.
-- `npm run lint` completed with **0 errors and 1 warning**; the warning was in `types/pathfinding.d.ts` and was addressed in commit `5ce3227`.
-- `npm run build` completed successfully on Next.js 15.5.28.
+- Initial `npm run lint` completed with **0 errors and 1 warning**; the warning was in `types/pathfinding.d.ts` and was addressed in commit `5ce3227`.
+- After the fix, `npm ci --no-audit --no-fund`, `npm run lint`, and `npm run build` all completed successfully in the clean-room sandbox. Lint then reported **0 warnings and 0 errors**; the Next.js 15.5.28 production build passed. The generated lockfile is still only in the sandbox and has not been committed to the repository.
 - The production homepage and OmniRoute health endpoint returned HTTP 200.
 - Unauthenticated OmniRoute chat completion was rejected with HTTP 401, as intended.
 - Production API checks confirmed that `GET /api/company` and `GET /api/projects` are reachable without an application credential. The company response includes people, agents, workers, tasks, hiring requests, notifications, and daily briefs. The projects endpoint returned project records.
@@ -59,7 +59,7 @@
 
 **Recommended fix:** Generate and commit a lockfile using the project's intended Node/npm versions, then use `npm ci` in CI. Review ESLint/Next compatibility and the deprecation notice before changing major versions. Do not approve third-party install scripts merely to silence a warning; confirm they are required and trusted first.
 
-**Status:** Open — no major dependency upgrade was made during this sweep.
+**Status:** Open — no major dependency upgrade was made during this sweep. A lockfile was generated and validated in the sandbox, but could not yet be transferred into the repository through the available authenticated Git workflow. CI still uses `npm install` until the lockfile is committed.
 
 ### Low — OmniRoute health reveals configuration metadata
 
