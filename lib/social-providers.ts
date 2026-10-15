@@ -72,7 +72,15 @@ export function getRedirectUri(provider: SocialProvider) {
 }
 
 export function isProviderConfigured(provider: SocialProvider) {
-  return SOCIAL_PROVIDERS[provider].env.every((key) => Boolean(process.env[key]));
+  const encryptionKey = process.env.SOCIAL_TOKEN_ENCRYPTION_KEY || "";
+  return SOCIAL_PROVIDERS[provider].env.every((key) => Boolean(process.env[key])) && /^[a-f0-9]{64}$/i.test(encryptionKey);
+}
+
+export function missingProviderConfiguration(provider: SocialProvider) {
+  const missing = SOCIAL_PROVIDERS[provider].env.filter((key) => !process.env[key]);
+  const encryptionKey = process.env.SOCIAL_TOKEN_ENCRYPTION_KEY || "";
+  if (!/^[a-f0-9]{64}$/i.test(encryptionKey)) missing.push("SOCIAL_TOKEN_ENCRYPTION_KEY");
+  return missing;
 }
 
 export function makeRandomState() {
