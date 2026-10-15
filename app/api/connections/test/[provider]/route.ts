@@ -30,7 +30,7 @@ async function fetchIdentity(provider: string, token: string) {
   return { remoteAccountId: id ? String(id) : null, accountLabel: name ? String(name) : null };
 }
 
-export async function POST(request: Request, context: { params: Promise<{ provider: string }> }) {
+export async function POST(_request: Request, context: { params: Promise<{ provider: string }> }) {
   const expected = process.env.CHO_ADMIN_TOKEN;
   const jar = await cookies();
   if (!expected || jar.get(COOKIE)?.value !== expected) return NextResponse.json({ error: "Sign in to test connected accounts." }, { status: 401 });
