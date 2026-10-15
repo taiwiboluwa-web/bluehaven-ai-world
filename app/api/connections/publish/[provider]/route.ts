@@ -93,7 +93,7 @@ export async function POST(request: Request, context: { params: Promise<{ provid
       if (!blogId) {
         const blogsResponse = await fetch("https://www.googleapis.com/blogger/v3/users/self/blogs", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
         const blogs = await jsonOrError(blogsResponse);
-        blogId = blogs.items?.[0]?.id;
+        blogId = blogs.items?.[0]?.id ? String(blogs.items[0].id) : undefined;
       }
       if (!blogId) throw new Error("No Blogger blog was found for this Google account. Create a Blogger blog first.");
       const postResponse = await fetch(`https://www.googleapis.com/blogger/v3/blogs/${encodeURIComponent(blogId)}/posts/`, {
