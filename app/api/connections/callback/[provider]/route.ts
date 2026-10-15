@@ -16,10 +16,10 @@ type TokenResponse = {
   data?: { access_token?: string; refresh_token?: string; expires_in?: number; scope?: string; token_type?: string };
 };
 
-function fail(message: string, status = 400) {
+function fail(message: string) {
   const url = new URL("/connections", process.env.APP_URL || "https://bluehaven-ai-world.vercel.app");
   url.searchParams.set("connection_error", message.slice(0, 180));
-  return NextResponse.redirect(url, status);
+  return NextResponse.redirect(url);
 }
 
 export async function GET(request: Request, context: { params: Promise<{ provider: string }> }) {
@@ -96,7 +96,7 @@ export async function GET(request: Request, context: { params: Promise<{ provide
     const scopes = scopeText ? scopeText.split(/[ ,]+/).filter(Boolean) : [...config.scopes];
     const accessCiphertext = encryptSecret(token);
     const refreshCiphertext = encryptSecret(refresh);
-    if (!accessCiphertext) return fail("Token encryption did not complete. Check SOCIAL_TOKEN_ENCRYPTION_KEY.", 500);
+    if (!accessCiphertext) return fail("Token encryption did not complete. Check SOCIAL_TOKEN_ENCRYPTION_KEY.");
     const expiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : null;
     await sql`
       INSERT INTO social_provider_tokens
@@ -122,6 +122,6 @@ export async function GET(request: Request, context: { params: Promise<{ provide
     return NextResponse.redirect(success);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Connection could not be saved.";
-    return fail(message.includes("SOCIAL_TOKEN_ENCRYPTION_KEY") ? message : "Connection could not be completed. Check the server configuration and try again.", 500);
+    return fail(message.includes("SOCIAL_TOKEN_ENCRYPTION_KEY") ? message : "Connection could not be completed. Check the server configuration and try again.");
   }
 }
