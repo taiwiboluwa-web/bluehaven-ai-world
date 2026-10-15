@@ -5,7 +5,7 @@ import Link from "next/link";
 
 type Agent = { id: string; name: string; department: string; role_description: string; status: string };
 type Provider = { id: string; label: string; status: string; configuredCount: number; requiredCount: number; missing: string[]; note: string };
-type Draft = { id: string; title: string; body: string; platforms: string[]; status: string; created_at: string };
+type Draft = { id: string; title: string; body: string; platforms: string[]; status: string; created_at: string; approval_note?: string | null; published_at?: string | null; external_ids?: Record<string, { remotePostId?: string; publishedUrl?: string; receiptKey?: string }> | null };
 type Mission = { missionId: string; selectedAgents: string[]; standbyAgents: string[]; routingNote: string; coordinationBrief: string; succeeded: number; total: number; results: { agent: string; status: string; output?: string; error?: string }[] };
 
 const platformOptions = [
@@ -89,6 +89,41 @@ export default function CreatorCommandCenter() {
     finally { setBusy(false); }
   }
 
+  async function approveDraft(id: string) {
+    if (!token) { setError("Enter the CHO admin token to approve a draft."); return; }
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const response = await fetch(`/api/creator/content/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "approve", note: "Approved in Creator Command Center by CHO." }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Draft approval failed.");
+      setNotice("Draft approved. You can now publish it to a supported, connected destination.");
+      await loadDrafts();
+    } catch (e) { setError(e instanceof Error ? e.message : "Draft approval failed."); }
+    finally { setBusy(false); }
+  }
+
+  async function publishDraft(draft: Draft, platform: string) {
+    if (!token) { setError("Enter the CHO admin token before publishing."); return; }
+    if (!window.confirm(`Publish “${draft.title}” to ${platform} now? This will create a public post.`)) return;
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const response = await fetch(`/api/creator/content/${draft.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "publish", platform, confirmPublish: true }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Publishing failed.");
+      setNotice(`Published to ${platform}. Receipt: ${data.receipt?.receiptKey || "recorded"}`);
+      await loadDrafts();
+    } catch (e) { setError(e instanceof Error ? e.message : "Publishing failed."); }
+    finally { setBusy(false); }
+  }
+
   function togglePlatform(id: string) { setPlatforms((old) => old.includes(id) ? old.filter((p) => p !== id) : [...old, id]); }
 
   return <main style={{ minHeight: "100vh", background: "#0b0d11", color: "#f4f0e8", padding: "clamp(20px,5vw,64px)", fontFamily: "Arial,sans-serif" }}>
@@ -169,7 +204,19 @@ export default function CreatorCommandCenter() {
           <p style={{ color: "#ffde59", fontSize: 12, letterSpacing: 2 }}>05 / CONTENT QUEUE</p><h2 style={{ marginTop: 0 }}>Saved drafts</h2>
           {!token && <p style={{ color: "#9299a6" }}>Enter your token to load the private draft queue.</p>}
           {token && drafts.length === 0 && <p style={{ color: "#9299a6" }}>No drafts loaded yet. Save a draft to begin the queue.</p>}
-          <div style={{ display: "grid", gap: 10 }}>{drafts.map((draft) => <article key={draft.id} style={{ padding: 12, border: "1px solid #303540", borderRadius: 8, background: "#0d1015" }}><div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><strong>{draft.title}</strong><span style={{ color: "#ffcf74", fontSize: 10 }}>{draft.status.toUpperCase()}</span></div><p style={{ color: "#a9adb7", whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.5 }}>{draft.body}</p><small style={{ color: "#9299a6" }}>{(draft.platforms || []).join(" · ")} · {new Date(draft.created_at).toLocaleString()}</small></article>)}</div>
+          <div style={{ display: "grid", gap: 10 }}>{drafts.map((draft) => <article key={draft.id} style={{ padding: 12, border: "1px solid #303540", borderRadius: 8, background: "#0d1015" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}><strong>{draft.title}</strong><span style={{ color: draft.status === "published" ? "#72d69a" : "#ffcf74", fontSize: 10 }}>{draft.status.toUpperCase()}</span></div>
+            <p style={{ color: "#a9adb7", whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.5 }}>{draft.body}</p>
+            <small style={{ color: "#9299a6" }}>{(draft.platforms || []).join(" · ")} · {new Date(draft.created_at).toLocaleString()}{draft.published_at ? " · Published " + new Date(draft.published_at).toLocaleString() : ""}</small>
+            {draft.approval_note && <p style={{ color: "#bcb0ff", fontSize: 12 }}>Approval: {draft.approval_note}</p>}
+            {draft.status === "draft" && <button type="button" disabled={busy} onClick={() => void approveDraft(draft.id)} style={{ marginTop: 10, padding: "9px 12px", background: "#9c8bff", color: "#0b0d11", border: 0, borderRadius: 7, fontWeight: 800, cursor: busy ? "wait" : "pointer" }}>CHO APPROVE</button>}
+            {draft.status === "approved" && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>{(draft.platforms || []).map((platform) => {
+              const supported = ["x", "linkedin", "blogger", "wordpress"].includes(platform);
+              const published = Boolean(draft.external_ids?.[platform]?.remotePostId);
+              return <button type="button" key={platform} disabled={busy || !supported || published} onClick={() => void publishDraft(draft, platform)} style={{ padding: "8px 10px", background: published ? "#183526" : supported ? "#ffde59" : "#252932", color: published ? "#72d69a" : supported ? "#0b0d11" : "#9299a6", border: 0, borderRadius: 7, fontSize: 11, fontWeight: 800, cursor: busy || !supported || published ? "not-allowed" : "pointer" }}>{published ? platform + " · PUBLISHED" : supported ? "PUBLISH TO " + platform.toUpperCase() : platform.toUpperCase() + " · DRAFT ONLY"}</button>;
+            })}</div>}
+            {draft.external_ids && Object.entries(draft.external_ids).map(([platform, receipt]) => receipt.publishedUrl ? <p key={platform} style={{ fontSize: 12, marginBottom: 0 }}><a href={receipt.publishedUrl} target="_blank" rel="noreferrer" style={{ color: "#bcb0ff" }}>Open {platform} post ↗</a></p> : null)}
+          </article>)}</div>
         </section>
       </section>
 
