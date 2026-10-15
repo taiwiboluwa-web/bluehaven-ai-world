@@ -27,8 +27,8 @@ async function askAgent(agent: Agent, goal: string, context: string) {
       model,
       temperature: 0.25,
       messages: [
-        { role: "system", content: `${agent.system_prompt}\n\nYou are operating as ${agent.name}, ${agent.department} lead in BlueHaven AI World. Do real intellectual work on the supplied task. Return a useful deliverable, concrete next steps, assumptions, and risks. Never claim you changed files, contacted people, browsed live websites, or performed external actions unless a connected tool explicitly did so. If work depends on tools not available to you, clearly mark it as a recommendation or blocked action.` },
-        { role: "user", content: `Company goal:\n${goal}\n\nCoordination brief:\n${context}\n\nProduce your department's contribution as a concise, directly usable work product. Reference dependencies or decisions needed from other departments.` }
+        { role: "system", content: `${agent.system_prompt}\n\nYou are operating as ${agent.name}, ${agent.department} lead in BlueHaven AI World. Solve the exact request; do not merely sound helpful. Start with the direct answer or finished deliverable, never generic filler or a restatement. Be concrete: give exact steps, wording, code, calculations, criteria, examples, or decisions appropriate to the task. Replace vague advice with measurable actions. Separate verified facts, assumptions, recommendations, and unknowns. Never invent facts, statistics, citations, tests, or completed external actions. Ask a follow-up only when a missing detail truly blocks correctness; otherwise state a reasonable assumption and proceed. If a required tool is unavailable, name the exact limitation. Avoid repetition, inflated claims, empty headings, and generic next steps. Follow the requested format and constraints exactly.` },
+        { role: "user", content: `Company goal:\n${goal}\n\nCoordination brief:\n${context}\n\nProduce a directly usable deliverable that answers the user's request, not generic commentary. Include specific details and acceptance checks where relevant. If evidence is missing, state precisely what is unknown rather than guessing.` }
       ]
     }),
     signal: AbortSignal.timeout(60000)
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     }
     if (!agents.length) return NextResponse.json({ error: "No eligible agents could be selected from the standby roster." }, { status: 503 });
 
-    const coordination = await askAgent(atlas, goal, "Act as the coordination lead. Create a short execution brief: desired outcome, workstreams, dependencies, quality criteria, and risks. Do not do the other departments' work.");
+    const coordination = await askAgent(atlas, goal, "Act as the execution planner. Convert the exact request into a compact, testable brief: requested outcome, constraints and assumptions, each agent's precise assignment, measurable acceptance criteria, and real blockers. No generic project-management advice. If the request is already clear, proceed without asking follow-up questions.");
     const parentRows = await sql`INSERT INTO company_tasks (title, description, department_agent_id, created_by, status, priority, started_at) VALUES (${("Collaborative mission: " + goal).slice(0,180)}, ${goal}, ${atlas.id}, 'CHO / Orchestrator', 'in_progress', 'high', now()) RETURNING id, title`;
     const parentId = String(parentRows[0].id);
     await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'BlueHaven Orchestrator', 'orchestration.started', 'A multi-agent mission was started.', 'company_task', ${parentId}::uuid, ${JSON.stringify({ goal, dispatchMode, routingNote, agents: agents.map((a) => a.name), standbyAgents: roster.filter((a) => a.name !== "Atlas" && !agents.some((picked) => picked.id === a.id)).map((a) => a.name) })}::jsonb)`;
