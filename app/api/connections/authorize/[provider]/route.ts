@@ -56,7 +56,7 @@ export async function GET(_request: Request, context: { params: Promise<{ provid
     url.searchParams.set("client_id", process.env.GOOGLE_CLIENT_ID!);
     url.searchParams.set("scope", config.scopes.join(" "));
     url.searchParams.set("access_type", "offline");
-    url.searchParams.set("prompt", "consent");
+    url.searchParams.set("prompt", "consent select_account");
     url.searchParams.set("include_granted_scopes", "true");
   } else if (provider === "linkedin") {
     url.searchParams.set("client_id", process.env.LINKEDIN_CLIENT_ID!);
