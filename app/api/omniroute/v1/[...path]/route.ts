@@ -208,21 +208,17 @@ async function proxy(request: Request, path: string[]) {
   }
 
   if (provider.protocol === "anthropic" && routePath !== "models" && routePath !== "chat/completions") {
-    return jsonError("Claude direct mode currently supports chat/completions and models. Use OpenRouter for other endpoint types.", 501);
+    return jsonError("Claude direct mode currently supports models and chat/completions. Use OpenRouter for other endpoint types.", 501);
   }
 
   const basePath = upstreamBase.pathname.replace(/\/$/, "");
-  const upstreamPath = provider.protocol === "anthropic" && routePath === "chat/completions"
-    ? "messages"
-    : routePath;
+  const upstreamPath = provider.protocol === "anthropic" && routePath === "chat/completions" ? "messages" : routePath;
   const target = new URL(`${basePath}/${upstreamPath}`.replace(/\/+/g, "/"), upstreamBase.origin);
   for (const [key, value] of incomingUrl.searchParams.entries()) {
     if (key !== "provider") target.searchParams.append(key, value);
   }
 
-  const headers = new Headers({
-    Accept: request.headers.get("accept") || "application/json",
-  });
+  const headers = new Headers({ Accept: request.headers.get("accept") || "application/json" });
   if (provider.protocol === "anthropic") {
     headers.set("x-api-key", provider.apiKey);
     headers.set("anthropic-version", "2023-06-01");
@@ -236,19 +232,24 @@ async function proxy(request: Request, path: string[]) {
     if (value) headers.set(name, value);
   }
 
-  let requestBody: ArrayBuffer | undefined;
+  let requestBody: string | ArrayBuffer | undefined;
   let requestedModel = provider.defaultModel;
   if (request.method === "POST") {
-    if (provider.protocol === "anthropic" && routePath === "chat/completions") {
+    if (routePath === "chat/completions") {
       let body: Record<string, unknown>;
       try {
         body = await request.json() as Record<string, unknown>;
       } catch {
         return jsonError("Request body must be valid JSON.", 400);
       }
-      if (body.stream === true) return jsonError("Streaming is not yet supported for direct Claude mode. Use OpenRouter for streaming.", 501);
       if (typeof body.model === "string" && body.model) requestedModel = body.model;
-      requestBody = new TextEncoder().encode(JSON.stringify(toAnthropicMessages(body, provider.defaultModel))).buffer;
+      if (provider.protocol === "anthropic") {
+        if (body.stream === true) return jsonError("Streaming is not yet supported for direct Claude mode. Use OpenRouter for streaming.", 501);
+        requestBody = JSON.stringify(toAnthropicMessages(body, provider.defaultModel));
+      } else {
+        if (!body.model) body.model = provider.defaultModel;
+        requestBody = JSON.stringify(body);
+      }
     } else {
       requestBody = await request.arrayBuffer();
     }
@@ -273,13 +274,8 @@ async function proxy(request: Request, path: string[]) {
 
     const responseHeaders = new Headers();
     for (const name of [
-      "content-type",
-      "cache-control",
-      "x-request-id",
-      "openai-processing-ms",
-      "x-ratelimit-limit-requests",
-      "x-ratelimit-remaining-requests",
-      "x-ratelimit-reset-requests",
+      "content-type", "cache-control", "x-request-id", "openai-processing-ms",
+      "x-ratelimit-limit-requests", "x-ratelimit-remaining-requests", "x-ratelimit-reset-requests",
     ]) {
       const value = upstreamResponse.headers.get(name);
       if (value) responseHeaders.set(name, value);
@@ -291,10 +287,7 @@ async function proxy(request: Request, path: string[]) {
       responseHeaders.set("cache-control", "no-store");
     }
 
-    return new Response(upstreamResponse.body, {
-      status: upstreamResponse.status,
-      headers: responseHeaders,
-    });
+    return new Response(upstreamResponse.body, { status: upstreamResponse.status, headers: responseHeaders });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Upstream gateway request failed.";
     return jsonError(`Upstream gateway request failed: ${message}`, 502);
