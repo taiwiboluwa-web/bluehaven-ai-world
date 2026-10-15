@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         "Use only these registered agents; choose by task fit, not by popularity:",
         ...roster.map((a) => `- ${a.name} | ${a.department} | ${a.role_description}`),
         "Choose the smallest team that can do excellent work. Include Echo for communications/social copy, Pixel for visual/media work, Forge for code, Piper for automation, Quinn for security/QA, Scout/Nova for research, Sage for knowledge/document work, Orbit for analytics/operations, and Atlas only if strategy itself is a key deliverable."
-      ].join("\\n");
+      ].join("\n");
       try {
         const routed = await askAgent(atlas, routingPrompt, "You are the task dispatcher. Route the prompt only; do not complete the task.");
         const jsonText = routed.output.match(/\\{[\\s\\S]*\\}/)?.[0];
