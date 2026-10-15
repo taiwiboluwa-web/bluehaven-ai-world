@@ -3,6 +3,10 @@
     {
       "path": "/api/company/brief",
       "schedule": "59 22 * * *"
+    },
+    {
+      "path": "/api/content-campaign/cron",
+      "schedule": "0 21 * * *"
     }
   ]
 }
