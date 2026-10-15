@@ -129,10 +129,10 @@ export default function CreatorCommandCenter() {
         <section style={{ border: "1px solid #2b3038", background: "#12151b", padding: 22, borderRadius: 14 }}>
           <p style={{ color: "#ffde59", fontSize: 12, letterSpacing: 2 }}>02 / THE STANDBY ROSTER</p>
           <h2 style={{ marginTop: 0 }}>Nine available agents</h2>
-          <div style={{ display: "grid", gap: 8 }}>{agents.map((agent) => <div key={agent.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: 10, background: "#0d1015", border: "1px solid #303540", borderRadius: 8 }}>
+          <div style={{ display: "grid", gap: 8 }}>{agents.filter((agent) => agent.name !== "Atlas").map((agent) => <div key={agent.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: 10, background: "#0d1015", border: "1px solid #303540", borderRadius: 8 }}>
             <span style={{ width: 8, height: 8, borderRadius: 99, background: agent.status === "working" ? "#ffb547" : "#72d69a", flex: "0 0 auto" }} />
             <span style={{ flex: 1 }}><strong>{agent.name}</strong><span style={{ display: "block", color: "#9299a6", fontSize: 12, marginTop: 3 }}>{agent.department}</span></span>
-            <span style={{ color: agent.status === "working" ? "#ffb547" : "#72d69a", fontSize: 10, letterSpacing: 1 }}>{(agent.status || "idle").toUpperCase()}</span>
+            <span style={{ color: agent.status === "working" ? "#ffb547" : "#72d69a", fontSize: 10, letterSpacing: 1 }}>{agent.status === "working" ? "RUNNING" : agent.status === "paused" ? "PAUSED" : agent.status === "error" ? "NEEDS ATTENTION" : "STANDBY"}</span>
           </div>)}</div>
         </section>
       </div>
