@@ -56,7 +56,7 @@ Give agents narrowly scoped, auditable tools so a task can move from recommendat
 
 ## Required setup in Vercel
 
-1. Open the [existing project environment settings](https://vercel.com/taiwowa-3003s-projects/bluehaven-ai-world/settings/environment-variables).
+1. Open the [existing project environment settings](https://vercel.com/taiwoluwa-3003s-projects/bluehaven-ai-world/settings/environment-variables).
 2. Create a GitHub App or fine-grained token restricted to this repository with read-only repository contents and Actions/workflow read permissions only, as needed.
 3. Add it as a server-only environment variable such as `GITHUB_APP_PRIVATE_KEY` / app credentials or `GITHUB_READ_TOKEN` (choose one implementation, not both by default).
 4. Redeploy the existing `main` deployment after adding the credential.
