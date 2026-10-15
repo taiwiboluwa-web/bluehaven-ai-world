@@ -1007,3 +1007,85 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+
+/* Finish the world-first art direction: keep the terrain inside the scene, not across the UI. */
+body { background: #0b1016; }
+.app-shell { background: #0b1016 !important; color: #f4f1e8; }
+.topbar { background: rgba(10,14,21,.94); }
+.intro-row {
+  position: relative;
+  inset: auto;
+  width: auto;
+  max-width: 1540px;
+  margin-inline: auto;
+  background: transparent;
+}
+.intro-row > div:first-child { padding: 0; background: transparent; border: 0; box-shadow: none; }
+.world-section { max-width: 1540px; margin-inline: auto; }
+.districts-section {
+  max-width: 1540px;
+  margin: 0 auto;
+  padding-top: 34px;
+  padding-bottom: 18px;
+  background: transparent;
+}
+.districts-heading > p { color: #aeb4bf; }
+.district-item {
+  min-height: 154px;
+  border-color: rgba(255,255,255,.12);
+  border-radius: 3px;
+  background: linear-gradient(145deg, rgba(26,28,39,.94), rgba(16,18,26,.96));
+  box-shadow: none;
+}
+.district-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(127,86,214,.72);
+  background: linear-gradient(145deg, rgba(40,31,58,.9), rgba(18,19,28,.98));
+}
+.district-index { color: #9f91ca; }
+.district-symbol {
+  border-radius: 3px;
+  border-color: rgba(127,86,214,.5);
+  background: rgba(127,86,214,.11);
+  color: #d5c8ff;
+}
+.district-item h3 { color: #f5f1e8; }
+.district-item p { color: #aeb4bf; }
+.district-state { color: var(--brand-yellow); }
+.district-builder .district-symbol { color: var(--brand-yellow); border-color: rgba(255,222,89,.4); background: rgba(255,222,89,.07); }
+.projects-section {
+  max-width: none;
+  padding-top: 42px;
+  padding-bottom: 56px;
+  background: #0e1219;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.project-list { background: #111620; }
+.project-row { border-bottom-color: rgba(255,255,255,.09); }
+.footer {
+  background: #0b1016;
+  border-top: 1px solid rgba(255,255,255,.1);
+  color: #858b99;
+}
+.detail-panel, .wizard-modal {
+  background: #121721;
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 30px 100px rgba(0,0,0,.62);
+}
+.wizard-modal input, .wizard-modal textarea, .wizard-modal select { background: #0c1119; }
+.wizard-note { background: rgba(127,86,214,.09); border-color: rgba(127,86,214,.28); }
+@media(max-width:760px) {
+  .intro-row { width: auto; margin-inline: 0; }
+  .intro-row > div:first-child { padding: 0; }
+  .districts-section { padding-top: 24px; }
+  .district-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .district-item { min-height: 160px; padding: 13px; }
+  .projects-section { padding-top: 28px; }
+}
+@media(max-width:440px) {
+  .intro-row { width: auto; }
+  .intro-text { display: block; }
+  .district-grid { grid-template-columns: 1fr; }
+  .district-item { min-height: 0; }
+}
