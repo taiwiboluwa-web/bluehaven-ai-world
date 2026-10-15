@@ -29,3 +29,31 @@
 .connections-footer{padding:25px 0 10px;border-top:1px solid var(--bh-line);color:#81788f;font-size:10px;letter-spacing:.04em}
 @media(max-width:900px){.provider-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.connections-section-heading{display:block}.connections-section-heading>p{margin-top:10px}}
 @media(max-width:600px){.connections-nav{align-items:flex-start;flex-direction:column;padding:17px 0}.connections-nav>div{flex-wrap:wrap}.provider-grid,.unsupported-grid{grid-template-columns:1fr}.connections-hero{padding-top:48px}.connections-hero h1{font-size:46px}.connections-toolbar{align-items:flex-start}.toolbar-note{display:block;margin:5px 0 0 16px}}
+
+
+/* Premium connection console — consistent brand accents and restrained surfaces. */
+:root { --bh-yellow: #ffde59; --bh-purple: #7f56d6; --bh-line: rgba(235,231,245,.14); }
+.connections-page { max-width: 1600px; margin-inline: auto; }
+.connections-nav { border-bottom-color: var(--bh-line); }
+.connections-brand span { background: var(--bh-yellow); color: #191820; border-radius: 3px; }
+.connections-hero { border-bottom-color: var(--bh-line); }
+.connections-hero h1 em { color: var(--bh-yellow); }
+.connections-login, .live-publish-form { border-radius: 3px; border-color: var(--bh-line); box-shadow: none; }
+.provider-grid, .unsupported-grid { gap: 0; background: var(--bh-line); border-color: var(--bh-line); }
+.provider-card { background: #15141b; transition: background .18s ease; }
+.provider-card:hover { background: #1c1924; }
+.provider-symbol { border-radius: 3px; background: rgba(127,86,214,.12); border-color: rgba(127,86,214,.42); color: #d7caff; }
+.provider-connect { border-radius: 3px; background: var(--bh-yellow); color: #1a1820; }
+.provider-test, .provider-disabled, .live-publish-form>button { border-radius: 3px; }
+.provider-missing, .provider-test-result, .publish-result { border-radius: 2px; }
+.connections-notice { border-radius: 3px; }
+.connections-error { border-radius: 3px; }
+.live-publish-form select:focus, .live-publish-form input:not([type=checkbox]):focus, .live-publish-form textarea:focus { border-color: var(--bh-purple); }
+@media(max-width:600px) {
+  .connections-page { padding-inline: 16px; }
+  .connections-hero h1 { font-size: clamp(36px, 10vw, 46px); }
+  .connections-toolbar { flex-wrap: wrap; gap: 12px; }
+  .provider-card { padding: 18px; min-height: 0; }
+  .connections-error { position: static; }
+}
+@media(prefers-reduced-motion:reduce) { .provider-card { transition: none !important; } }
