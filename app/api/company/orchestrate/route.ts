@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     } else {
       const routingPrompt = [
         "Select the best 1 to 4 specialist agents to execute the user's goal. Atlas will separately coordinate the mission.",
-        "Return ONLY valid JSON in this exact shape: {\\"agents\\":[\\"Forge\\",\\"Quinn\\"],\\"reason\\":\\"short reason\\"}.",
+        "Return only valid JSON with keys agents (an array of registered agent names) and reason (a short explanation). Do not use markdown.",
         "Use only these registered agents; choose by task fit, not by popularity:",
         ...roster.map((a) => `- ${a.name} | ${a.department} | ${a.role_description}`),
         "Choose the smallest team that can do excellent work. Include Echo for communications/social copy, Pixel for visual/media work, Forge for code, Piper for automation, Quinn for security/QA, Scout/Nova for research, Sage for knowledge/document work, Orbit for analytics/operations, and Atlas only if strategy itself is a key deliverable."
