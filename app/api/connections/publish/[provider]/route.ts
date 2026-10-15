@@ -50,10 +50,11 @@ export async function POST(request: Request, context: { params: Promise<{ provid
   const payloadHash = hashPayload(provider, body);
   try {
     const sql = getSql();
-    const tokenRows = await sql`SELECT access_token_ciphertext, expires_at, status FROM social_provider_tokens WHERE provider = ${provider} AND account_id = 'default' LIMIT 1`;
+    const tokenRows = await sql`SELECT access_token_ciphertext, expires_at, status, capabilities FROM social_provider_tokens WHERE provider = ${provider} AND account_id = 'default' LIMIT 1`;
     if (!tokenRows.length) return NextResponse.json({ error: "Connect and test this provider before publishing." }, { status: 409 });
-    const tokenRow = tokenRows[0] as { access_token_ciphertext: string; expires_at: string | null; status: string };
+    const tokenRow = tokenRows[0] as { access_token_ciphertext: string; expires_at: string | null; status: string; capabilities: Record<string, unknown> };
     if (tokenRow.status !== "connected") return NextResponse.json({ error: "This provider connection is not active. Reauthorize and test it first." }, { status: 409 });
+    if (tokenRow.capabilities?.identityCheck !== "passed") return NextResponse.json({ error: "Run Test connection successfully before publishing." }, { status: 409 });
     if (tokenRow.expires_at && new Date(tokenRow.expires_at).getTime() <= Date.now()) {
       await sql`UPDATE social_provider_tokens SET status = 'needs_reauthorization', last_error = 'Access token expired.', updated_at = now() WHERE provider = ${provider} AND account_id = 'default'`;
       return NextResponse.json({ error: "The saved access token has expired. Reconnect the account before publishing." }, { status: 401 });
