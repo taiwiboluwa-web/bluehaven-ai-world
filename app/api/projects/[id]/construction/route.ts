@@ -13,10 +13,12 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     const project = rows[0] as { id: string; name: string; status: string };
     if (project.status === "active") return NextResponse.json({ status: "active", message: "Building is already operational." });
 
-    const apiKey = process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY;
-    const model = process.env.AI_DEFAULT_MODEL;
-    if (!apiKey || !model) {
-      const message = "Project saved, but activation is waiting for AI_GATEWAY_API_KEY and AI_DEFAULT_MODEL in the server environment.";
+    const omniRouteBase = process.env.OMNIROUTE_BASE_URL?.trim();
+    const isOmniRoute = Boolean(omniRouteBase);
+    const apiKey = process.env.OMNIROUTE_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY || "";
+    const model = process.env.OMNIROUTE_DEFAULT_MODEL?.trim() || process.env.AI_DEFAULT_MODEL;
+    if (!model || (!isOmniRoute && !apiKey)) {
+      const message = "Project saved, but activation is waiting for OMNIROUTE_BASE_URL and OMNIROUTE_DEFAULT_MODEL (or the existing AI gateway credentials and AI_DEFAULT_MODEL).";
       await sql`UPDATE ai_projects SET status = 'failed', last_error = ${message}, updated_at = now() WHERE id = ${id}::uuid`;
       await sql`UPDATE agent_jobs SET status = 'failed', error = ${message}, finished_at = now(), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'queued'`;
       await sql`INSERT INTO agent_events (project_id, event_type, message) VALUES (${id}::uuid, 'construction.blocked', ${message})`;
@@ -25,11 +27,15 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
 
     await sql`UPDATE ai_projects SET status = 'initializing', last_error = NULL, updated_at = now() WHERE id = ${id}::uuid`;
     await sql`UPDATE agent_jobs SET status = 'running', progress = 70, started_at = COALESCE(started_at, now()), updated_at = now() WHERE project_id = ${id}::uuid AND status = 'queued'`;
-    const baseUrl = (process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, "");
+    const configuredBase = omniRouteBase || process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1";
+    const baseUrl = configuredBase.replace(/\/+$/, "");
+    const modelsUrl = baseUrl.endsWith("/v1") ? `${baseUrl}/models` : `${baseUrl}/v1/models`;
     // Validate the gateway and selected model without spending tokens on a billable chat completion.
-    const response = await fetch(`${baseUrl}/models`, {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+    const response = await fetch(modelsUrl, {
       method: "GET",
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers,
       signal: AbortSignal.timeout(20000),
       cache: "no-store",
     });
