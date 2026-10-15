@@ -22,5 +22,12 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Cache Next.js build artifacts
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('package.json') }}-${{ hashFiles('app/**', 'components/**', 'lib/**', 'next.config.*') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('package.json') }}-
       - name: Verify production build
         run: npm run build
