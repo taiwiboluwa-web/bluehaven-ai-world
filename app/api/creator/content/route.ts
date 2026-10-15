@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   try {
     const sql = await ensureTable();
     const rows = await sql`INSERT INTO creator_content_drafts (title, body, platforms, status, created_by) VALUES (${title}, ${content}, ${JSON.stringify(platforms)}::jsonb, 'draft', 'CHO / Creator Command Center') RETURNING id, title, body, platforms, status, created_at`;
-    await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('cho', 'Creator Command Center', 'creator.draft.created', ${"Created draft: " + title}, 'creator_draft', ${rows[0].id}::uuid, ${JSON.stringify({ platforms, status: "draft" })}::jsonb)`;
+    await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'Creator Command Center', 'creator.draft.created', ${"Created draft: " + title}, 'creator_draft', ${rows[0].id}::uuid, ${JSON.stringify({ platforms, status: "draft" })}::jsonb)`;
     return NextResponse.json({ draft: rows[0], publishing: "disabled_until_oauth_and_approval_are_verified" }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Draft could not be saved. Verify DATABASE_URL and Neon connectivity." }, { status: 503 });
