@@ -1107,3 +1107,14 @@ body { background: #0b1016; }
   .world-heading { display: flex; }
   .scene-wrap { position: relative; inset: auto; height: min(66svh,540px); min-height: 390px; margin-top: 14px; }
 }
+
+
+/* Bring back the operational metrics without returning to the old dashboard-card look. */
+.intro-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; }
+.intro-row > div:first-child { flex: 1 1 620px; min-width: 0; }
+.village-stats { display: grid; flex: 0 1 440px; min-width: min(42%, 420px); }
+@media(max-width:760px) {
+  .intro-row { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }
+  .intro-row > div:first-child { flex: 1 1 auto; }
+  .village-stats { width: 100%; min-width: 0; flex: 0 0 auto; }
+}
