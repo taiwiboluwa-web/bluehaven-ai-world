@@ -10,7 +10,7 @@ type Mission = { missionId: string; selectedAgents: string[]; standbyAgents: str
 
 const platformOptions = [
   { id: "instagram", label: "Instagram" }, { id: "facebook", label: "Facebook" }, { id: "x", label: "X" },
-  { id: "tiktok", label: "TikTok" }, { id: "linkedin", label: "LinkedIn" }, { id: "youtube", label: "YouTube" }, { id: "pinterest", label: "Pinterest" },
+  { id: "tiktok", label: "TikTok" }, { id: "linkedin", label: "LinkedIn" }, { id: "youtube", label: "YouTube (draft handoff)" }, { id: "pinterest", label: "Pinterest" }, { id: "blogger", label: "Blogger" }, { id: "wordpress", label: "WordPress.com" },
 ];
 
 export default function CreatorCommandCenter() {
