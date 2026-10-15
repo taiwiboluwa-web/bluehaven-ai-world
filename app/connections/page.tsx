@@ -151,17 +151,18 @@ export default function ConnectionsPage() {
         })}</div>
       </section>
       <section className="connections-section live-publish-section">
-        <div className="connections-section-heading"><div><div className="connections-section-label">02 / CONTROLLED LIVE PUBLISHING</div><h2>Send a real test post</h2></div><p>Currently supported here: X text posts, Blogger articles and WordPress.com articles. This publishes immediately, not as a draft.</p></div>
+        <div className="connections-section-heading"><div><div className="connections-section-label">02 / CONTROLLED LIVE PUBLISHING</div><h2>Send a real test post</h2></div><p>Currently supported here: X and LinkedIn text posts, Blogger articles and WordPress.com articles. This publishes immediately, not as a draft.</p></div>
         <form className="live-publish-form" onSubmit={publishPost}>
           <label htmlFor="publish-provider">Destination</label>
           <select id="publish-provider" value={publishProvider} onChange={(event) => { setPublishProvider(event.target.value); setConfirmPublish(false); }}>
             <option value="x">X — short post</option>
+            <option value="linkedin">LinkedIn — text post</option>
             <option value="google">Blogger — article</option>
             <option value="wordpress">WordPress.com — article</option>
           </select>
-          {publishProvider !== "x" && <><label htmlFor="publish-title">Article title</label><input id="publish-title" value={publishTitle} onChange={(event) => setPublishTitle(event.target.value)} required maxLength={500} /></>}
-          <label htmlFor="publish-content">{publishProvider === "x" ? "Post text (max 280 characters)" : "Article content (HTML supported by destination)"}</label>
-          <textarea id="publish-content" value={publishContent} onChange={(event) => setPublishContent(event.target.value)} required maxLength={publishProvider === "x" ? 280 : 100000} rows={publishProvider === "x" ? 4 : 8} />
+          {!["x", "linkedin"].includes(publishProvider) && <><label htmlFor="publish-title">Article title</label><input id="publish-title" value={publishTitle} onChange={(event) => setPublishTitle(event.target.value)} required maxLength={500} /></>}
+          <label htmlFor="publish-content">{publishProvider === "x" ? "Post text (max 280 characters)" : publishProvider === "linkedin" ? "LinkedIn post text" : "Article content (HTML supported by destination)"}</label>
+          <textarea id="publish-content" value={publishContent} onChange={(event) => setPublishContent(event.target.value)} required maxLength={publishProvider === "x" ? 280 : publishProvider === "linkedin" ? 3000 : 100000} rows={publishProvider === "x" || publishProvider === "linkedin" ? 4 : 8} />
           <label className="publish-confirm"><input type="checkbox" checked={confirmPublish} onChange={(event) => setConfirmPublish(event.target.checked)} /> I understand this will publish publicly to the selected account immediately.</label>
           <button type="submit" disabled={publishing || !data?.providers.find((provider) => provider.provider === publishProvider)?.connected || !confirmPublish}>{publishing ? "Publishing…" : "Publish live post"}</button>
           {!data?.providers.find((provider) => provider.provider === publishProvider)?.connected && <p className="publish-help">Connect and test this destination above before publishing.</p>}
