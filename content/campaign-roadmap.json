@@ -1,0 +1,533 @@
+{
+  "campaign": {
+    "slug": "bluehaven-40-day-media-tech",
+    "name": "BlueHaven 40-Day Media & Technology Campaign",
+    "website": "https://www.bluehavens.name.ng/",
+    "timezone": "Africa/Lagos",
+    "startDate": "2026-10-16",
+    "durationDays": 40,
+    "brand": {
+      "tagline": "Creativity Beyond Limits",
+      "colors": [
+        "#ffde59",
+        "#7f56d6"
+      ]
+    },
+    "dailyPostRange": [
+      2,
+      5
+    ],
+    "slotsWAT": [
+      "08:00",
+      "10:00",
+      "12:00",
+      "14:00",
+      "16:00"
+    ],
+    "defaultPublishMode": "draft_only"
+  },
+  "days": [
+    {
+      "day": 1,
+      "date": "2026-10-16",
+      "theme": "OBS Studio",
+      "angle": "Build a reliable scene and audio-check routine",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2026-10-17",
+      "theme": "Streamlabs Desktop",
+      "angle": "When convenience beats a fully custom setup",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2026-10-18",
+      "theme": "vMix",
+      "angle": "Multi-camera production planning and input discipline",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2026-10-19",
+      "theme": "Restream",
+      "angle": "Simulcasting trade-offs and audience workflow",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 5,
+      "date": "2026-10-20",
+      "theme": "Audio routing",
+      "angle": "Diagnose mute, monitoring, and sync problems",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 6,
+      "date": "2026-10-21",
+      "theme": "Stream overlays",
+      "angle": "Visual hierarchy over decorative clutter",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 7,
+      "date": "2026-10-22",
+      "theme": "Live production checklist",
+      "angle": "Rehearsal, backups, and a calm operator",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 8,
+      "date": "2026-10-23",
+      "theme": "Figma",
+      "angle": "Components, variables, and collaborative design",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 9,
+      "date": "2026-10-24",
+      "theme": "Canva",
+      "angle": "Design systems and reusable brand templates",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 10,
+      "date": "2026-10-25",
+      "theme": "Adobe Express",
+      "angle": "Quick content production with brand consistency",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 11,
+      "date": "2026-10-26",
+      "theme": "Photoshop",
+      "angle": "Non-destructive editing and export discipline",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 12,
+      "date": "2026-10-27",
+      "theme": "CapCut",
+      "angle": "Short-form editing and caption readability",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 13,
+      "date": "2026-10-28",
+      "theme": "DaVinci Resolve",
+      "angle": "Timeline organization and audio finishing",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 14,
+      "date": "2026-10-29",
+      "theme": "Visual storytelling",
+      "angle": "Turn a feature list into a clear visual narrative",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 15,
+      "date": "2026-10-30",
+      "theme": "GitHub",
+      "angle": "Small commits, branches, and readable project history",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 16,
+      "date": "2026-10-31",
+      "theme": "VS Code",
+      "angle": "Editor workflow, extensions, and workspace hygiene",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 17,
+      "date": "2026-11-01",
+      "theme": "Next.js",
+      "angle": "Routes, server-side work, and deployment awareness",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 18,
+      "date": "2026-11-02",
+      "theme": "Vercel",
+      "angle": "Preview deployments and production safety",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 19,
+      "date": "2026-11-03",
+      "theme": "Neon Postgres",
+      "angle": "Schema design, migrations, and query discipline",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 20,
+      "date": "2026-11-04",
+      "theme": "Supabase",
+      "angle": "Know what the platform provides and what you own",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 21,
+      "date": "2026-11-05",
+      "theme": "API design",
+      "angle": "Validate inputs, authenticate, and report useful errors",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 22,
+      "date": "2026-11-06",
+      "theme": "Python automation",
+      "angle": "Automate repetitive file and reporting tasks",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 23,
+      "date": "2026-11-07",
+      "theme": "pandas",
+      "angle": "Clean data before drawing conclusions",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 24,
+      "date": "2026-11-08",
+      "theme": "Pillow",
+      "angle": "Batch image processing and export consistency",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 25,
+      "date": "2026-11-09",
+      "theme": "MoviePy and FFmpeg",
+      "angle": "Practical video batch workflows and limits",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 26,
+      "date": "2026-11-10",
+      "theme": "FastAPI",
+      "angle": "A small, well-documented API endpoint",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 27,
+      "date": "2026-11-11",
+      "theme": "Jupyter",
+      "angle": "Exploratory work that can be reproduced",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 28,
+      "date": "2026-11-12",
+      "theme": "Python packaging",
+      "angle": "Environments, pinned dependencies, and repeatability",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 29,
+      "date": "2026-11-13",
+      "theme": "AI prompting",
+      "angle": "Context, constraints, examples, and evaluation",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 30,
+      "date": "2026-11-14",
+      "theme": "OpenAI-compatible gateways",
+      "angle": "Provider flexibility and secret handling",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 31,
+      "date": "2026-11-15",
+      "theme": "AI agents",
+      "angle": "Separate model output from actual tool execution",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 32,
+      "date": "2026-11-16",
+      "theme": "Retrieval and knowledge bases",
+      "angle": "Ground answers in sources and show uncertainty",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 33,
+      "date": "2026-11-17",
+      "theme": "AI evaluation",
+      "angle": "Test cases, regressions, and human review",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 34,
+      "date": "2026-11-18",
+      "theme": "AI safety and permissions",
+      "angle": "Least privilege, approval gates, and audit trails",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 35,
+      "date": "2026-11-19",
+      "theme": "AI video tools",
+      "angle": "Plan consistency, rights, and clear disclosure",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 36,
+      "date": "2026-11-20",
+      "theme": "Creator analytics",
+      "angle": "Measure saves, clicks, watch time, and conversions",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 37,
+      "date": "2026-11-21",
+      "theme": "SEO fundamentals",
+      "angle": "Useful titles, internal links, and search intent",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 38,
+      "date": "2026-11-22",
+      "theme": "Google Search Console",
+      "angle": "Use impressions and queries to improve content",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 39,
+      "date": "2026-11-23",
+      "theme": "Repurposing",
+      "angle": "Turn one useful idea into distinct native formats",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "day": 40,
+      "date": "2026-11-24",
+      "theme": "Campaign retrospective",
+      "angle": "Share learnings, best-performing formats, and next steps",
+      "postsTarget": 3,
+      "slotIndices": [
+        0,
+        2,
+        4
+      ]
+    }
+  ],
+  "requirements": {
+    "eachPost": [
+      "x_copy_under_280_characters",
+      "instagram_caption",
+      "visual_brief",
+      "approx_150_word_seo_snippet",
+      "official_handle_or_verified_url",
+      "sources",
+      "website_cta",
+      "publication_status"
+    ],
+    "voice": "Human, hands-on, specific, respectful, strengths-first; no generic marketing filler.",
+    "safety": "Never claim publishing or scheduling succeeded without provider confirmation.",
+    "platformNotes": {
+      "googleSearchConsole": "Analytics and search visibility, not a publishing destination.",
+      "googleCloud": "Infrastructure/storage, not a generic article publisher.",
+      "instagram": "Visual media required; verify publishing capability per connector.",
+      "x": "Verify account/API authorization and publish result.",
+      "medium": "Verify currently supported publishing method before promising direct publishing.",
+      "blogger": "Requires OAuth authorization to the specific blog."
+    }
+  }
+}
