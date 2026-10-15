@@ -93,7 +93,7 @@ export async function GET(request: Request, context: { params: Promise<{ provide
 
     const expiresIn = tokenBody.data?.expires_in || tokenBody.expires_in;
     const scopeText = tokenBody.data?.scope || tokenBody.scope || "";
-    const scopes = scopeText ? scopeText.split(/[ ,]+/).filter(Boolean) : [...config.scopes];
+    const scopes = scopeText ? scopeText.split(/[ ,]+/).filter(Boolean) : [];
     const accessCiphertext = encryptSecret(token);
     const refreshCiphertext = encryptSecret(refresh);
     if (!accessCiphertext) return fail("Token encryption did not complete. Check SOCIAL_TOKEN_ENCRYPTION_KEY.");
