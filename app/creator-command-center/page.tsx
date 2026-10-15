@@ -144,7 +144,7 @@ export default function CreatorCommandCenter() {
       <section style={{ border: "1px solid #34303f", background: "#12151b", padding: 20, borderRadius: 14, marginBottom: 24 }}>
         <label style={{ display: "block", color: "#c4c8d0", fontSize: 12, marginBottom: 8 }}>CHO ADMIN TOKEN OR AGENT SERVICE TOKEN</label>
         <input type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} placeholder="Used in memory for authorized requests only" style={{ width: "100%", maxWidth: 600, boxSizing: "border-box", padding: 13, background: "#090b0f", border: "1px solid #363b45", borderRadius: 9, color: "#fff" }} />
-        <p style={{ color: "#858b97", fontSize: 12, marginBottom: 0 }}>Token is not stored in the database. Never paste it into a prompt or repository.</p>
+        <p style={{ color: "#858b97", fontSize: 12, marginBottom: 0 }}>Token is not stored in the database. Never paste it into a prompt or repository. Agent service tokens can run missions and save drafts; CHO admin token is required to approve drafts and publish.</p>
       </section>
 
       {error && <div role="alert" style={{ padding: 14, marginBottom: 16, border: "1px solid #824448", background: "#32191a", borderRadius: 9 }}>{error}</div>}
@@ -205,7 +205,7 @@ export default function CreatorCommandCenter() {
           {!token && <p style={{ color: "#9299a6" }}>Enter your token to load the private draft queue.</p>}
           {token && drafts.length === 0 && <p style={{ color: "#9299a6" }}>No drafts loaded yet. Save a draft to begin the queue.</p>}
           <div style={{ display: "grid", gap: 10 }}>{drafts.map((draft) => <article key={draft.id} style={{ padding: 12, border: "1px solid #303540", borderRadius: 8, background: "#0d1015" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}><strong>{draft.title}</strong><span style={{ color: draft.status === "published" ? "#72d69a" : "#ffcf74", fontSize: 10 }}>{draft.status.toUpperCase()}</span></div>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}><strong>{draft.title}</strong><span style={{ color: draft.status === "published" ? "#72d69a" : "#ffcf74", fontSize: 10 }}>{draft.status === "approved" && Object.keys(draft.external_ids || {}).length ? "PARTIALLY PUBLISHED" : draft.status.toUpperCase()}</span></div>
             <p style={{ color: "#a9adb7", whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.5 }}>{draft.body}</p>
             <small style={{ color: "#9299a6" }}>{(draft.platforms || []).join(" · ")} · {new Date(draft.created_at).toLocaleString()}{draft.published_at ? " · Published " + new Date(draft.published_at).toLocaleString() : ""}</small>
             {draft.approval_note && <p style={{ color: "#bcb0ff", fontSize: 12 }}>Approval: {draft.approval_note}</p>}
