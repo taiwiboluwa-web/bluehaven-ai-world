@@ -44,7 +44,13 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
       signal: AbortSignal.timeout(20000),
       cache: "no-store",
     });
-    const data = await response.json() as { data?: { id?: string }[]; error?: { message?: string } };
+    const responseText = await response.text();
+    let data: { data?: { id?: string }[]; error?: { message?: string } } = {};
+    try {
+      data = JSON.parse(responseText) as typeof data;
+    } catch {
+      // Some gateways return HTML/text for upstream errors; preserve a useful failure state.
+    }
     const modelAvailable = data.data?.some((entry) => entry.id === model);
     if (!response.ok || !modelAvailable) {
       const message = data.error?.message || (response.ok ? `Configured model "${model}" was not listed by the gateway.` : `AI gateway check failed (HTTP ${response.status}).`);
@@ -60,6 +66,17 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ status: "active", model, message: "Gateway and model verified. Building is operational." });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Construction could not be completed.";
+    // Do not leave a project stuck in "initializing" when the gateway times out,
+    // returns malformed JSON, or the network fails. Best-effort persistence keeps
+    // the UI honest while still returning the original operational error.
+    try {
+      const sql = getSql();
+      await sql`UPDATE ai_projects SET status = 'failed', last_error = ${message}, updated_at = now() WHERE id = ${id}::uuid AND status IN ('under_construction', 'initializing')`;
+      await sql`UPDATE agent_jobs SET status = 'failed', error = ${message}, finished_at = now(), updated_at = now() WHERE project_id = ${id}::uuid AND status IN ('queued', 'running')`;
+      await sql`INSERT INTO agent_events (project_id, event_type, message) VALUES (${id}::uuid, 'construction.failed', ${message})`;
+    } catch {
+      // The database may be the failing dependency; don't mask the original error.
+    }
     return NextResponse.json({ error: message }, { status: 503 });
   }
 }
