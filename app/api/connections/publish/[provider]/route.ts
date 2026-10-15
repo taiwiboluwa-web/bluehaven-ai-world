@@ -30,7 +30,9 @@ async function jsonOrError(response: Response) {
 export async function POST(request: Request, context: { params: Promise<{ provider: string }> }) {
   const expected = process.env.CHO_ADMIN_TOKEN;
   const jar = await cookies();
-  if (!expected || jar.get(COOKIE)?.value !== expected) return NextResponse.json({ error: "Sign in to publish from BlueHaven." }, { status: 401 });
+  const cookieAuthorized = Boolean(expected && jar.get(COOKIE)?.value === expected);
+  const bearerAuthorized = Boolean(expected && request.headers.get("authorization") === `Bearer ${expected}`);
+  if (!expected || (!cookieAuthorized && !bearerAuthorized)) return NextResponse.json({ error: "CHO authorization is required to publish from BlueHaven." }, { status: 401 });
   const { provider } = await context.params;
   if (!isSocialProvider(provider)) return NextResponse.json({ error: "Unsupported provider." }, { status: 404 });
   if (!["x", "linkedin", "google", "wordpress"].includes(provider)) {
