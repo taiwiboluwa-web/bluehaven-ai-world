@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   catch { return NextResponse.json({ error: "Send a valid JSON request." }, { status: 400 }); }
   const title = body.title?.trim() || "";
   const content = body.body?.trim() || "";
-  const allowed = new Set(["instagram", "facebook", "x", "tiktok", "linkedin", "youtube", "pinterest"]);
+  const allowed = new Set(["instagram", "facebook", "x", "tiktok", "linkedin", "youtube", "pinterest", "blogger", "wordpress"]);
   const platforms = Array.isArray(body.platforms) ? [...new Set(body.platforms.filter((p): p is string => typeof p === "string" && allowed.has(p)))] : [];
   if (!title || title.length > 180 || content.length < 5 || content.length > 12000 || !platforms.length) {
     return NextResponse.json({ error: "Provide a title, 5–12,000 characters of content, and at least one supported destination." }, { status: 400 });
