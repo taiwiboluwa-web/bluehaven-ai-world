@@ -89,7 +89,7 @@ export default function CompanyCommandPage() {
         <section style={{ background: "#12151b", border: "1px solid #2b3038", padding: 24, borderRadius: 16 }}>
           <div style={{ color: "#ffde59", fontSize: 12, letterSpacing: 2 }}>AVAILABLE DEPARTMENT HEADS</div>
           <p style={{ color: "#9fa4af", fontSize: 13, lineHeight: 1.6 }}>{dispatchMode === "auto" ? "Atlas selects the smallest relevant specialist team from your goal. These checkboxes are ignored in auto mode." : "Choose 2–4 specialists. Atlas coordinates the mission and is not a specialist option."}</p>
-          <div style={{ display: "grid", gap: 8 }}>{agents.map((agent) => {
+          <div style={{ display: "grid", gap: 8 }}>{agents.filter((agent) => agent.name !== "Atlas").map((agent) => {
             const checked = selected.includes(agent.name);
             return <label key={agent.id} style={{ display: "flex", gap: 11, alignItems: "flex-start", padding: 12, border: `1px solid ${checked ? "#8170e8" : "#303540"}`, background: checked ? "#211d35" : "#0d1015", borderRadius: 10, cursor: dispatchMode === "auto" ? "default" : selected.length >= 4 && !checked ? "not-allowed" : "pointer" }}>
               <input type="checkbox" checked={checked} onChange={() => toggle(agent.name)} disabled={dispatchMode === "auto" || (selected.length >= 4 && !checked)} style={{ marginTop: 3, accentColor: "#9c8bff" }}/>
