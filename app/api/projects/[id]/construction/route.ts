@@ -15,8 +15,13 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
 
     const omniRouteBase = process.env.OMNIROUTE_BASE_URL?.trim();
     const isOmniRoute = Boolean(omniRouteBase);
-    const apiKey = process.env.OMNIROUTE_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY || "";
-    const model = process.env.OMNIROUTE_DEFAULT_MODEL?.trim() || process.env.AI_DEFAULT_MODEL;
+    // Keep gateway credentials isolated: never send an OpenRouter/other gateway key to OmniRoute.
+    const apiKey = isOmniRoute
+      ? process.env.OMNIROUTE_API_KEY || ""
+      : process.env.AI_GATEWAY_API_KEY || process.env.OPENROUTER_API_KEY || "";
+    const model = isOmniRoute
+      ? process.env.OMNIROUTE_DEFAULT_MODEL?.trim()
+      : process.env.AI_DEFAULT_MODEL;
     if (!model || (!isOmniRoute && !apiKey)) {
       const message = "Project saved, but activation is waiting for OMNIROUTE_BASE_URL and OMNIROUTE_DEFAULT_MODEL (or the existing AI gateway credentials and AI_DEFAULT_MODEL).";
       await sql`UPDATE ai_projects SET status = 'failed', last_error = ${message}, updated_at = now() WHERE id = ${id}::uuid`;
