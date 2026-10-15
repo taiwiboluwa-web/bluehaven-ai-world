@@ -7,6 +7,29 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const COOKIE = "bluehaven_social_admin";
 
+type GoogleServiceCheck = {
+  ok: true;
+  count: number;
+};
+
+async function googleServiceCheck(url: string, token: string, collectionKey: string): Promise<GoogleServiceCheck> {
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    cache: "no-store",
+  });
+  const body = await response.json().catch(() => ({})) as Record<string, unknown>;
+  if (!response.ok) {
+    const message = typeof body.error === "object" && body.error && "message" in body.error
+      ? String((body.error as { message: unknown }).message)
+      : typeof body.error_description === "string"
+        ? body.error_description
+        : `Google API returned HTTP ${response.status}.`;
+    throw new Error(message);
+  }
+  const items = body[collectionKey];
+  return { ok: true, count: Array.isArray(items) ? items.length : 0 };
+}
+
 async function fetchIdentity(provider: string, token: string) {
   const headers = { Authorization: `Bearer ${token}`, Accept: "application/json" };
   let url = "";
@@ -27,7 +50,23 @@ async function fetchIdentity(provider: string, token: string) {
   const data = body.data && typeof body.data === "object" ? body.data as Record<string, unknown> : body;
   const id = data.id ?? data.open_id ?? data.sub ?? data.user_id;
   const name = data.name ?? data.display_name ?? data.username ?? data.login ?? data.email;
-  return { remoteAccountId: id ? String(id) : null, accountLabel: name ? String(name) : null };
+
+  // Google sign-in is not considered tested until both requested APIs accept the saved token.
+  // Successful empty lists are valid: a Google account may not yet own a Blogger blog or YouTube channel.
+  let googleServices: { blogger: GoogleServiceCheck; youtube: GoogleServiceCheck } | undefined;
+  if (provider === "google") {
+    const [blogger, youtube] = await Promise.all([
+      googleServiceCheck("https://www.googleapis.com/blogger/v3/users/self/blogs", token, "items"),
+      googleServiceCheck("https://youtube.googleapis.com/youtube/v3/channels?part=id,snippet&mine=true&maxResults=50", token, "items"),
+    ]);
+    googleServices = { blogger, youtube };
+  }
+
+  return {
+    remoteAccountId: id ? String(id) : null,
+    accountLabel: name ? String(name) : null,
+    ...(googleServices ? { googleServices } : {}),
+  };
 }
 
 export async function POST(_request: Request, context: { params: Promise<{ provider: string }> }) {
@@ -48,8 +87,25 @@ export async function POST(_request: Request, context: { params: Promise<{ provi
     const token = decryptSecret(row.access_token_ciphertext);
     if (!token) return NextResponse.json({ error: "The saved access token could not be decrypted." }, { status: 500 });
     const identity = await fetchIdentity(provider, token);
-    await sql`UPDATE social_provider_tokens SET account_label = COALESCE(${identity.accountLabel}, account_label), capabilities = capabilities || ${JSON.stringify({ identityCheck: "passed", remoteAccountId: identity.remoteAccountId, identityCheckedAt: new Date().toISOString(), publishing: "not_tested" })}::jsonb, last_verified_at = now(), last_error = NULL, status = 'connected', updated_at = now() WHERE provider = ${provider} AND account_id = 'default'`;
-    return NextResponse.json({ ok: true, provider, accountLabel: identity.accountLabel, remoteAccountId: identity.remoteAccountId, publishingTested: false, message: "Account identity check passed. This confirms authorization, not permission to publish." });
+    const capabilities = {
+      identityCheck: "passed",
+      remoteAccountId: identity.remoteAccountId,
+      identityCheckedAt: new Date().toISOString(),
+      publishing: "not_tested",
+      ...(identity.googleServices ? { googleServices: identity.googleServices } : {}),
+    };
+    await sql`UPDATE social_provider_tokens SET account_label = COALESCE(${identity.accountLabel}, account_label), capabilities = capabilities || ${JSON.stringify(capabilities)}::jsonb, last_verified_at = now(), last_error = NULL, status = 'connected', updated_at = now() WHERE provider = ${provider} AND account_id = 'default'`;
+    return NextResponse.json({
+      ok: true,
+      provider,
+      accountLabel: identity.accountLabel,
+      remoteAccountId: identity.remoteAccountId,
+      ...(identity.googleServices ? { services: identity.googleServices } : {}),
+      publishingTested: false,
+      message: provider === "google"
+        ? "Google identity, Blogger API access, and YouTube API access verified. Publishing has not been tested."
+        : "Account identity check passed. This confirms authorization, not permission to publish.",
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Account check failed.";
     try {
