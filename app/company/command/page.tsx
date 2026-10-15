@@ -5,9 +5,10 @@ import Link from "next/link";
 
 type Agent = { id: string; name: string; department: string; role_description: string };
 type Outcome = { agent: string; department: string; taskId: string; status: "completed" | "failed"; output?: string; error?: string; model?: string };
-type Mission = { missionId: string; goal: string; coordinationBrief: string; status: string; succeeded: number; total: number; results: Outcome[] };
+type Mission = { missionId: string; goal: string; coordinationBrief: string; finalAnswer?: string; status: string; succeeded: number; total: number; results: Outcome[] };
 
-const defaults = ["Atlas", "Forge", "Quinn"];
+const defaults = ["Forge", "Quinn"];
+type DispatchMode = "auto" | "manual";
 const suggestions = [
   "Plan a new BlueHaven service launch with deliverables, timeline, risks, and quality checks.",
   "Review a website feature idea and produce an implementation plan, content outline, and QA checklist.",
@@ -17,6 +18,7 @@ const suggestions = [
 export default function CompanyCommandPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selected, setSelected] = useState<string[]>(defaults);
+  const [dispatchMode, setDispatchMode] = useState<DispatchMode>("auto");
   const [goal, setGoal] = useState("");
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,13 +38,13 @@ export default function CompanyCommandPage() {
 
   async function runMission(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (selected.length < 2) { setError("Choose at least two agents."); return; }
+    if (dispatchMode === "manual" && selected.length < 2) { setError("Choose at least two specialist agents."); return; }
     setLoading(true); setError(""); setMission(null);
     try {
       const response = await fetch("/api/company/orchestrate", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ goal, agentNames: selected })
+        body: JSON.stringify({ goal, dispatchMode, ...(dispatchMode === "manual" ? { agentNames: selected } : {}) })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Mission failed.");
@@ -67,6 +69,14 @@ export default function CompanyCommandPage() {
       <form onSubmit={runMission} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(280px, 0.8fr)", gap: 20, alignItems: "start" }}>
         <section style={{ background: "#12151b", border: "1px solid #2b3038", padding: 24, borderRadius: 16 }}>
           <label style={{ display: "block", color: "#c4c8d0", fontSize: 13, marginBottom: 10 }}>MISSION BRIEF</label>
+          <div role="group" aria-label="Team selection mode" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8, marginBottom: 14 }}>
+            <button type="button" onClick={() => setDispatchMode("auto")} aria-pressed={dispatchMode === "auto"} style={{ padding: "12px 14px", textAlign: "left", borderRadius: 9, cursor: "pointer", border: dispatchMode === "auto" ? "1px solid #ffde59" : "1px solid #343a45", background: dispatchMode === "auto" ? "#292512" : "#0d1015", color: "#f4f0e8" }}>
+              <strong>Let Atlas pick the team</strong><span style={{ display: "block", marginTop: 5, color: "#a9adb7", fontSize: 12 }}>Recommended · route by task fit</span>
+            </button>
+            <button type="button" onClick={() => setDispatchMode("manual")} aria-pressed={dispatchMode === "manual"} style={{ padding: "12px 14px", textAlign: "left", borderRadius: 9, cursor: "pointer", border: dispatchMode === "manual" ? "1px solid #9c8bff" : "1px solid #343a45", background: dispatchMode === "manual" ? "#211d35" : "#0d1015", color: "#f4f0e8" }}>
+              <strong>Choose specialists</strong><span style={{ display: "block", marginTop: 5, color: "#a9adb7", fontSize: 12 }}>Manually choose 2–4 agents</span>
+            </button>
+          </div>
           <textarea value={goal} onChange={(e) => setGoal(e.target.value)} required minLength={12} maxLength={6000} placeholder="Describe the outcome, context, constraints, and what done looks like…" style={{ width: "100%", minHeight: 190, resize: "vertical", boxSizing: "border-box", padding: 16, background: "#090b0f", border: "1px solid #363b45", borderRadius: 10, color: "#f4f0e8", font: "inherit", lineHeight: 1.6 }} />
           <div style={{ marginTop: 18, color: "#9fa4af", fontSize: 12 }}>QUICK STARTS</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>{suggestions.map((s) => <button key={s} type="button" onClick={() => setGoal(s)} style={{ background: "#1a1e26", color: "#cbd0db", border: "1px solid #343a45", borderRadius: 8, padding: "9px 11px", cursor: "pointer", textAlign: "left" }}>{s}</button>)}</div>
@@ -78,15 +88,15 @@ export default function CompanyCommandPage() {
 
         <section style={{ background: "#12151b", border: "1px solid #2b3038", padding: 24, borderRadius: 16 }}>
           <div style={{ color: "#ffde59", fontSize: 12, letterSpacing: 2 }}>AVAILABLE DEPARTMENT HEADS</div>
-          <p style={{ color: "#9fa4af", fontSize: 13, lineHeight: 1.6 }}>Choose 2–4 agents. Atlas coordinates first; selected leads then create independent contributions using the shared brief.</p>
+          <p style={{ color: "#9fa4af", fontSize: 13, lineHeight: 1.6 }}>{dispatchMode === "auto" ? "Atlas selects the smallest relevant specialist team from your goal. These checkboxes are ignored in auto mode." : "Choose 2–4 specialists. Atlas coordinates the mission and is not a specialist option."}</p>
           <div style={{ display: "grid", gap: 8 }}>{agents.map((agent) => {
             const checked = selected.includes(agent.name);
-            return <label key={agent.id} style={{ display: "flex", gap: 11, alignItems: "flex-start", padding: 12, border: `1px solid ${checked ? "#8170e8" : "#303540"}`, background: checked ? "#211d35" : "#0d1015", borderRadius: 10, cursor: selected.length >= 4 && !checked ? "not-allowed" : "pointer" }}>
-              <input type="checkbox" checked={checked} onChange={() => toggle(agent.name)} disabled={selected.length >= 4 && !checked} style={{ marginTop: 3, accentColor: "#9c8bff" }}/>
+            return <label key={agent.id} style={{ display: "flex", gap: 11, alignItems: "flex-start", padding: 12, border: `1px solid ${checked ? "#8170e8" : "#303540"}`, background: checked ? "#211d35" : "#0d1015", borderRadius: 10, cursor: dispatchMode === "auto" ? "default" : selected.length >= 4 && !checked ? "not-allowed" : "pointer" }}>
+              <input type="checkbox" checked={checked} onChange={() => toggle(agent.name)} disabled={dispatchMode === "auto" || (selected.length >= 4 && !checked)} style={{ marginTop: 3, accentColor: "#9c8bff" }}/>
               <span><strong>{agent.name}</strong><span style={{ display: "block", color: "#a2a8b3", fontSize: 12, marginTop: 3 }}>{agent.department}</span><span style={{ display: "block", color: "#7e8490", fontSize: 12, marginTop: 5, lineHeight: 1.45 }}>{agent.role_description}</span></span>
             </label>;
           })}</div>
-          <div style={{ color: "#9fa4af", fontSize: 12, marginTop: 14 }}>{selected.length}/4 selected · minimum 2</div>
+          <div style={{ color: "#9fa4af", fontSize: 12, marginTop: 14 }}>{dispatchMode === "auto" ? "Atlas selects 1–4 specialists automatically." : `${selected.length}/4 selected · minimum 2`}</div>
         </section>
       </form>
 
