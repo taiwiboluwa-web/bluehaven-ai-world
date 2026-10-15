@@ -43,7 +43,11 @@ export async function GET(request: Request) {
     const day = next[0] as { id: string; day_number: number; campaign_date: string; theme: string; status: string };
     const roadmapDay = roadmap.days.find(item => item.day === day.day_number);
     if (!roadmapDay) return NextResponse.json({ error: "No editorial brief exists for this campaign day." }, { status: 500 });
-    await sql`UPDATE content_campaign_days SET status = 'generating', run_started_at = now(), error_message = NULL, updated_at = now() WHERE id = ${day.id}::uuid`;
+    // Atomically claim the day so overlapping cron invocations cannot generate duplicate paid AI work.
+    const claimed = await sql`UPDATE content_campaign_days SET status = 'generating', run_started_at = now(), error_message = NULL, updated_at = now() WHERE id = ${day.id}::uuid AND status = ${day.status} RETURNING id`;
+    if (!claimed.length) {
+      return NextResponse.json({ ok: true, skipped: true, message: "Another campaign run already claimed this day." }, { status: 409 });
+    }
     const runs = await sql`INSERT INTO content_campaign_runs (campaign_id, campaign_day_id, run_type, status, details) VALUES (${campaign.id}::uuid, ${day.id}::uuid, 'prepare', 'started', ${JSON.stringify({ day: day.day_number, theme: day.theme })}::jsonb) RETURNING id`;
     const runId = String(runs[0].id);
 
