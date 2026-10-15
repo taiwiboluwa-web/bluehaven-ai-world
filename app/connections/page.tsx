@@ -118,7 +118,7 @@ export default function ConnectionsPage() {
       <div className="connections-kicker">FIRST-PARTY ACCOUNT CONTROL</div>
       <h1>Your channels.<br/><em>One control room.</em></h1>
       <p>Authorize social accounts directly with their official providers. BlueHaven stores encrypted tokens server-side and will only mark publishing as ready after a successful test.</p>
-      <div className="connections-callout"><strong>Important</strong><span>Never enter a social-media password here. The Connect buttons redirect to the platform's official authorization page.</span></div>
+      <div className="connections-callout"><strong>Important</strong><span>Never enter a social-media password here. The Connect buttons redirect to the platform&apos;s official authorization page.</span></div>
     </section>
 
     {!signedIn ? <section className="connections-login">
@@ -144,6 +144,8 @@ export default function ConnectionsPage() {
             {connection && <div className="provider-detail"><span>Account</span><strong>{connection.accountLabel || connection.accountId}</strong><span>Last authorized</span><strong>{connection.lastVerifiedAt ? new Date(connection.lastVerifiedAt).toLocaleString() : "Not verified"}</strong></div>}
             {!provider.configured && <div className="provider-missing"><strong>Missing server settings</strong><span>{provider.missingConfiguration.join(", ")}</span></div>}
             {connection?.lastError && <div className="provider-error">{connection.lastError}</div>}
+            {testResults[provider.provider] && <div className="provider-test-result">{testResults[provider.provider]}</div>}
+            {provider.connected && <button className="provider-test" disabled={testingProvider === provider.provider} onClick={() => void testProvider(provider.provider)}>{testingProvider === provider.provider ? "Testing…" : "Test connection"}</button>}
             {provider.configured ? <a className="provider-connect" href={`/api/connections/authorize/${provider.provider}`}>{provider.connected ? "Reconnect account ↗" : "Connect account ↗"}</a> : <button className="provider-disabled" disabled>Configure OAuth app first</button>}
           </article>;
         })}</div>
