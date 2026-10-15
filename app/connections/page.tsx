@@ -26,6 +26,8 @@ export default function ConnectionsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [testingProvider, setTestingProvider] = useState("");
+  const [testResults, setTestResults] = useState<Record<string, string>>({});
 
   const refresh = useCallback(async () => {
     const response = await fetch("/api/connections", { cache: "no-store" });
@@ -62,7 +64,7 @@ export default function ConnectionsPage() {
     finally { setBusy(false); }
   }
 
-  async function signOut() {
+  async function testProvider(provider: string) {\n    setTestingProvider(provider); setError("");\n    try {\n      const response = await fetch(`/api/connections/test/${provider}`, { method: "POST" });\n      const result = await response.json();\n      if (!response.ok) throw new Error(result.error || "Connection test failed.");\n      setTestResults((old) => ({ ...old, [provider]: `Identity verified${result.accountLabel ? `: ${result.accountLabel}` : ""}. Publishing has not been tested.` }));\n      await refresh();\n    } catch (e) { setTestResults((old) => ({ ...old, [provider]: e instanceof Error ? e.message : "Connection test failed." })); }\n    finally { setTestingProvider(""); }\n  }\n\n  async function signOut() {
     await fetch("/api/connections/session", { method: "DELETE" });
     setSignedIn(false); setData(null); setAdminToken("");
   }
