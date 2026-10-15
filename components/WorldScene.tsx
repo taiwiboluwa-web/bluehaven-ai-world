@@ -191,14 +191,14 @@ function World({projects,buildingId,onSelect,onDistrictSelect}:{projects:Project
     <Agent start={[-1.5,.05,-1.2]} destination={[-3.9,-2.3]} obstacles={obstacles} color="#f3c969" phase={0}/>
     <Agent start={[1.7,.05,1.2]} destination={[3.8,-2.5]} obstacles={obstacles} color="#8ce0b0" phase={2.3}/>
     <Agent start={[-1.2,.05,1.6]} destination={[-4.1,2.4]} obstacles={obstacles} color="#a9a1ff" phase={4.4}/>
-    <ContactShadows position={[0,-.02,0]} opacity={.22} scale={19} blur={2.2} far={5}/>
+    <ContactShadows position={[0,-.02,0]} opacity={.18} scale={19} blur={1.7} far={4.5} resolution={256}/>
   </group>;
 }
 export default function WorldScene({projects,buildingId,onSelect,onDistrictSelect}:Props) {
-  return <Canvas shadows dpr={[1,1.15]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance"}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
+  return <Canvas shadows dpr={[1,1.1]} camera={{position:[9,9.5,10.5],fov:38}} gl={{antialias:false,alpha:true,powerPreference:"high-performance", stencil:false}} onCreated={({gl})=>{gl.setClearColor("#a8d7ec",1);}}>
     <color attach="background" args={["#a8d7ec"]}/><fog attach="fog" args={["#a8d7ec",25,39]}/>
     <ambientLight intensity={1.05}/><hemisphereLight args={["#d9e8ff","#40533d",1.2]}/>
-    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
+    <directionalLight position={[7,13,5]} intensity={2.1} castShadow shadow-mapSize-width={512} shadow-mapSize-height={512} shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={13} shadow-camera-bottom={-13}/>
     <Suspense fallback={null}><Float speed={.25} rotationIntensity={.006} floatIntensity={.012}><World projects={projects} buildingId={buildingId} onSelect={onSelect} onDistrictSelect={onDistrictSelect}/></Float></Suspense>
     <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={17} minPolarAngle={.55} maxPolarAngle={1.23} target={[0,.35,0]} enableDamping dampingFactor={.075}/>
   </Canvas>;
