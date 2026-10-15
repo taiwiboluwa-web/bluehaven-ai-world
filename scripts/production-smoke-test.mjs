@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * BlueHaven AI World production smoke test.
+ * Never publishes social posts and never prints secret values.
  *
- * Safe by default: never publishes social posts and never prints secret values.
  * Optional environment variables:
  *   BLUEHAVEN_BASE_URL       (default: https://bluehaven-ai-world.vercel.app)
  *   OMNIROUTE_API_KEY        (required for authenticated model test)
- *   CHO_ADMIN_TOKEN          (required to test valid CHO login and protected connections)
+ *   CHO_ADMIN_TOKEN          (required for valid CHO login + connection readiness)
  *   OMNIROUTE_TEST_MODEL     (optional; defaults to google/gemma-4-26b-a4b-it)
  */
 const baseUrl = (process.env.BLUEHAVEN_BASE_URL || "https://bluehaven-ai-world.vercel.app").replace(/\/$/, "");
@@ -49,11 +49,11 @@ try {
         temperature: 0
       })
     });
-    const text = chat.body?.choices?.[0]?.message?.content;
-    report("Authenticated upstream chat completion", chat.response.ok && typeof text === "string" && text.length > 0,
-      chat.response.ok ? (text ? "model returned a message" : "response missing choices[0].message.content") : `HTTP ${chat.response.status}: ${chat.body?.error?.message || chat.body?.error || "request failed"}`);
+    const content = chat.body?.choices?.[0]?.message?.content;
+    report("Authenticated upstream chat completion", chat.response.ok && typeof content === "string" && content.length > 0,
+      chat.response.ok ? (content ? "model returned a message" : "response missing choices[0].message.content") : `HTTP ${chat.response.status}: ${chat.body?.error?.message || chat.body?.error || "request failed"}`);
   } else {
-    report("Authenticated upstream chat completion", false, "skipped: set OMNIROUTE_API_KEY in your local shell to run this test");
+    report("Authenticated upstream chat completion", false, "skipped: set OMNIROUTE_API_KEY in your local shell");
   }
 
   const wrongCho = await request("/api/connections/session", {
@@ -61,8 +61,7 @@ try {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ token: "invalid-smoke-test-token" })
   });
-  report("Invalid CHO token is rejected", wrongCho.response.status === 401 || wrongCho.response.status === 503,
-    `HTTP ${wrongCho.response.status}`);
+  report("Invalid CHO token is rejected", wrongCho.response.status === 401, `HTTP ${wrongCho.response.status}`);
 
   if (process.env.CHO_ADMIN_TOKEN) {
     const login = await request("/api/connections/session", {
@@ -71,12 +70,18 @@ try {
       body: JSON.stringify({ token: process.env.CHO_ADMIN_TOKEN })
     });
     const cookie = login.response.headers.get("set-cookie")?.split(";")[0];
-    report("Valid CHO token establishes admin session", login.response.ok && Boolean(cookie),
-      `HTTP ${login.response.status}`);
+    report("Valid CHO token establishes admin session", login.response.ok && Boolean(cookie), `HTTP ${login.response.status}`);
     if (login.response.ok && cookie) {
       const status = await request("/api/connections", { headers: { cookie } });
-      report("Protected social connections status endpoint", status.response.ok,
-        `HTTP ${status.response.status}${status.response.ok ? "" : " — database/schema or session issue"}`);
+      report("Protected social connections endpoint", status.response.ok, `HTTP ${status.response.status}`);
+      if (status.response.ok && Array.isArray(status.body.providers)) {
+        const configured = status.body.providers.filter((provider) => provider.configured).length;
+        const total = status.body.providers.length;
+        report("OAuth provider readiness inventory", total > 0, `${configured}/${total} providers have credentials configured; no OAuth consent or live post was initiated`);
+        for (const provider of status.body.providers) {
+          console.log(`  ${provider.configured ? "READY" : "NEEDS SETUP"}  ${provider.label}${provider.missingConfiguration?.length ? " — missing " + provider.missingConfiguration.join(", ") : ""}`);
+        }
+      }
     }
   } else {
     report("Valid CHO token establishes admin session", false, "skipped: set CHO_ADMIN_TOKEN in your local shell");
