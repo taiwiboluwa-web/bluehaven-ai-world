@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,500;1,600&display=swap");
-
 :root {
   color-scheme: dark;
   --bg: #0b1117;
@@ -12,8 +10,9 @@
   --gold: #f3c969;
   --green: #8ce0b0;
   --blue: #7bc8dd;
-  --sans: "Manrope", sans-serif;
-  --mono: "DM Mono", monospace;
+  --sans: var(--font-manrope), "Manrope", sans-serif;
+  --mono: var(--font-dm-mono), "DM Mono", monospace;
+  --display: var(--font-playfair), "Playfair Display", Georgia, serif;
 }
 * { box-sizing: border-box; }
 html { min-width: 320px; background: var(--bg); scroll-behavior: smooth; }
@@ -73,7 +72,7 @@ a { color: inherit; }
 .kicker { display: flex; align-items: center; gap: 10px; margin: 0; text-transform: uppercase; }
 .kicker span { width: 26px; height: 2px; border-radius: 2px; background: var(--gold); }
 h1 { max-width: 740px; margin: 21px 0 19px; font-size: clamp(42px, 5.5vw, 76px); line-height: .99; letter-spacing: -.065em; font-weight: 700; }
-h1 em, .wizard-modal h2 em { color: var(--gold); font-family: "Playfair Display", serif; font-weight: 500; }
+h1 em, .wizard-modal h2 em { color: var(--gold); font-family: var(--display); font-weight: 500; }
 .intro-text { max-width: 540px; margin: 0; color: #b3c0ba; font-size: 14px; line-height: 1.85; }
 .gold-button {
   display: inline-flex; align-items: center; justify-content: space-between; gap: 25px;
@@ -856,4 +855,24 @@ h1 em { color: #ffdf69; }
 @media (max-width: 600px) {
   .district-detail { padding: 18px 16px; }
   .district-detail h3 { font-size: 17px; }
+}
+
+
+/* Finish pass: responsive motion, accessible controls and a consistent premium interaction language. */
+:root { scrollbar-color: rgba(255,222,105,.42) rgba(10,18,22,.8); scrollbar-width: thin; }
+html { scroll-behavior: smooth; scroll-padding-top: 22px; }
+body { font-family: var(--sans); }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button, a { touch-action: manipulation; }
+button:not(:disabled) { transition: transform .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, opacity .18s ease; }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { cursor: not-allowed; }
+input, textarea, select { transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: none; border-color: var(--gold, #ffde59); box-shadow: 0 0 0 3px rgba(255,222,89,.12); }
+::selection { background: rgba(255,222,89,.28); color: #fffdf4; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+@media (hover: none) {
+  .district-item:hover, .gold-button:hover, .village-rail button:hover { transform: none; }
 }
