@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     const coordination = await askAgent(atlas, goal, "Act as the coordination lead. Create a short execution brief: desired outcome, workstreams, dependencies, quality criteria, and risks. Do not do the other departments' work.");
     const parentRows = await sql`INSERT INTO company_tasks (title, description, department_agent_id, created_by, status, priority, started_at) VALUES (${("Collaborative mission: " + goal).slice(0,180)}, ${goal}, ${atlas.id}, 'CHO / Orchestrator', 'in_progress', 'high', now()) RETURNING id, title`;
     const parentId = String(parentRows[0].id);
-    await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'BlueHaven Orchestrator', 'orchestration.started', 'A multi-agent mission was started.', 'company_task', ${parentId}::uuid, ${JSON.stringify({ goal, dispatchMode, routingNote, agents: agents.map((a) => a.name), standbyAgents: roster.filter((a) => !agents.some((picked) => picked.id === a.id)).map((a) => a.name) })}::jsonb)`;
+    await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'BlueHaven Orchestrator', 'orchestration.started', 'A multi-agent mission was started.', 'company_task', ${parentId}::uuid, ${JSON.stringify({ goal, dispatchMode, routingNote, agents: agents.map((a) => a.name), standbyAgents: roster.filter((a) => a.name !== "Atlas" && !agents.some((picked) => picked.id === a.id)).map((a) => a.name) })}::jsonb)`;
 
     const results: { agent: string; department: string; taskId: string; status: "completed" | "failed"; output?: string; error?: string; model?: string }[] = [];
     let sharedContext = coordination.output;
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
     const summary = results.map((r) => `${r.agent}: ${r.status}${r.error ? " — " + r.error : ""}`).join("\n");
     await sql`UPDATE company_tasks SET status = ${finalStatus}, result_summary = ${("Coordination brief:\n" + coordination.output + "\n\nAgent outcomes:\n" + summary).slice(0,8000)}, completed_at = now(), updated_at = now() WHERE id = ${parentId}::uuid`;
     await sql`INSERT INTO company_audit_events (actor_type, actor_name, event_type, message, entity_type, entity_id, payload) VALUES ('system', 'BlueHaven Orchestrator', 'orchestration.finished', ${"Mission finished: " + succeeded + " of " + results.length + " agent contributions succeeded."}, 'company_task', ${parentId}::uuid, ${JSON.stringify({ succeeded, total: results.length })}::jsonb)`;
-    return NextResponse.json({ missionId: parentId, goal, dispatchMode, routingNote, selectedAgents: agents.map((a) => a.name), standbyAgents: roster.filter((a) => !agents.some((picked) => picked.id === a.id)).map((a) => a.name), coordinationBrief: coordination.output, status: finalStatus, succeeded, total: results.length, results });
+    return NextResponse.json({ missionId: parentId, goal, dispatchMode, routingNote, selectedAgents: agents.map((a) => a.name), standbyAgents: roster.filter((a) => a.name !== "Atlas" && !agents.some((picked) => picked.id === a.id)).map((a) => a.name), coordinationBrief: coordination.output, status: finalStatus, succeeded, total: results.length, results });
   } catch (error) {
     const message = error instanceof Error ? error.message : "The collaborative mission could not run.";
     return NextResponse.json({ error: message }, { status: 500 });
