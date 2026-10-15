@@ -83,7 +83,7 @@ export default function CompanyPage() {
   return <main className="company-shell">
     <header className="company-topbar">
       <Link href="/" className="company-brand"><span className="company-mark">B</span><span>BLUEHAVEN <i>AI WORLD</i></span></Link>
-      <div className="company-top-actions"><span className="company-live"><i/> COMPANY SYSTEM</span><Link href="/company/command" className="company-command-link">Run AI mission ↗</Link><button onClick={() => { setLoading(true); void refresh(); }}>Refresh data ↻</button></div>
+      <div className="company-top-actions"><span className="company-live"><i/> COMPANY SYSTEM</span><Link href="/company/command" className="company-command-link">Run AI mission ↗</Link><Link href="/creator-command-center" className="company-command-link">Creator Command Center ↗</Link><button onClick={() => { setLoading(true); void refresh(); }}>Refresh data ↻</button></div>
     </header>
     <section className="company-hero">
       <div><p className="company-eyebrow">EXECUTIVE OFFICE / COMPANY OPERATIONS</p><h1>The company<br/><em>behind the world.</em></h1><p>One human executive. One Chief of Staff. Ten AI department heads. Every task logged, every hire governed, every day accounted for.</p></div>
