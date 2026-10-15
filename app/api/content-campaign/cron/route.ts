@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     const runs = await sql`INSERT INTO content_campaign_runs (campaign_id, campaign_day_id, run_type, status, details) VALUES (${campaign.id}::uuid, ${day.id}::uuid, 'prepare', 'started', ${JSON.stringify({ day: day.day_number, theme: day.theme })}::jsonb) RETURNING id`;
     const runId = String(runs[0].id);
 
-    const prompt = `Create exactly 3 distinct content ideas for BlueHaven Studios' 40-day media-tech education campaign.
+    const prompt = `Create exactly 5 distinct content ideas for BlueHaven Studios' 40-day media-tech education campaign.
 Brand: BlueHaven Studios, tagline "Creativity Beyond Limits", website https://www.bluehavens.name.ng/, colors #ffde59 and #7f56d6.
 Day ${day.day_number} (${day.campaign_date}); theme: ${day.theme}; angle: ${roadmapDay.angle}.
 Audience: creators, livestream operators, designers, developers, and small creative teams, especially practical emerging-market workflows.
@@ -55,7 +55,7 @@ Voice: conversational practitioner, specific and useful; strengths first, respec
 Each idea must teach a different actionable point. Do not invent current product features, pricing, official handles, URLs, personal experience, or performance figures. Do not fabricate sources: use empty sources/handles unless known with high confidence; these will need editorial verification before publication.
 Return ONLY valid JSON matching this shape:
 {"posts":[{"topic":"unique short title","x_copy":"under 280 characters including CTA/link","caption":"Instagram-ready caption with hook, practical steps, CTA to https://www.bluehavens.name.ng/ and 3-6 relevant hashtags","seo_snippet":"about 150 words, useful standalone explanation with natural search terms and website link","visual_brief":{"format":"carousel or single image","frame_by_frame":["..."],"on_image_copy":"...","composition":"...","alt_text":"..."},"sources":[],"handles":[]}]}
-Exactly 3 posts. Do not repeat the same hook across the three. `;
+Exactly 5 posts. Do not repeat the same hook across the five. `;
     const response = await fetch(`${(process.env.AI_GATEWAY_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, "")}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -70,14 +70,14 @@ Exactly 3 posts. Do not repeat the same hook across the three. `;
     const content = payload.choices?.[0]?.message?.content;
     if (!content) throw new Error("AI gateway returned an empty response.");
     const parsed = parseJson(content);
-    if (!Array.isArray(parsed.posts) || parsed.posts.length !== 3) throw new Error("The model must return exactly three posts.");
+    if (!Array.isArray(parsed.posts) || parsed.posts.length !== 5) throw new Error("The model must return exactly five posts for the five daily publishing slots.");
     let savedPosts = 0;
     for (let i = 0; i < parsed.posts.length; i++) {
       const post = parsed.posts[i];
       if (!post.topic || !post.x_copy || post.x_copy.length > 280 || !post.caption || !post.seo_snippet || !post.visual_brief) {
         throw new Error(`Post ${i + 1} failed required-field or X character-limit validation.`);
       }
-      const schedule = ["08:00", "12:00", "16:00"][i];
+      const schedule = ["08:00", "10:00", "12:00", "14:00", "16:00"][i];
       const scheduledFor = `${day.campaign_date}T${schedule}:00+01:00`;
       const platforms = [
         { platform: "x", copy: post.x_copy, caption: null, seo: null },
