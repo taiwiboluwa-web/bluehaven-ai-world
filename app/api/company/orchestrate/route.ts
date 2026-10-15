@@ -67,37 +67,38 @@ export async function POST(request: Request) {
       agents = requestedNames.map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
       if (agents.length !== requestedNames.length) return NextResponse.json({ error: "One or more selected agents are not registered in the company roster." }, { status: 400 });
     } else {
+      const eligibleRoster = roster.filter((agent) => agent.name !== "Atlas");
       const routingPrompt = [
-        "Select the best 1 to 4 specialist agents to execute the user's goal. Atlas will separately coordinate the mission.",
+        "Select the best 1 to 4 specialist agents to execute the user's goal. Atlas will separately coordinate the mission and must not be selected as a specialist.",
         "Return only valid JSON with keys agents (an array of registered agent names) and reason (a short explanation). Do not use markdown.",
         "Use only these registered agents; choose by task fit, not by popularity:",
-        ...roster.map((a) => `- ${a.name} | ${a.department} | ${a.role_description}`),
+        ...eligibleRoster.map((a) => `- ${a.name} | ${a.department} | ${a.role_description}`),
         "Choose the smallest team that can do excellent work. Include Echo for communications/social copy, Pixel for visual/media work, Forge for code, Piper for automation, Quinn for security/QA, Scout/Nova for research, Sage for knowledge/document work, Orbit for analytics/operations, and Atlas only if strategy itself is a key deliverable."
       ].join("\n");
       try {
         const routed = await askAgent(atlas, routingPrompt, "You are the task dispatcher. Route the prompt only; do not complete the task.");
-        const jsonText = routed.output.match(/\\{[\\s\\S]*\\}/)?.[0];
+        const jsonText = routed.output.match(/\{[\s\S]*\}/)?.[0];
         const parsed = jsonText ? JSON.parse(jsonText) as { agents?: unknown; reason?: unknown } : {};
         const names = Array.isArray(parsed.agents) ? [...new Set(parsed.agents.filter((v): v is string => typeof v === "string"))].slice(0, 4) : [];
-        agents = names.map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
+        agents = names.filter((name) => name !== "Atlas").map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
         routingNote = typeof parsed.reason === "string" ? parsed.reason.slice(0, 500) : "Selected by Atlas based on task fit.";
       } catch {
         const textGoal = goal.toLowerCase();
         const fallbackNames = [
-          ...( /\\b(code|bug|deploy|api|website|build|software|github)\\b/.test(textGoal) ? ["Forge"] : []),
-          ...( /\\b(security|test|audit|risk|qa|review)\\b/.test(textGoal) ? ["Quinn"] : []),
-          ...( /\\b(social|publish|campaign|caption|marketing|brand|email|content)\\b/.test(textGoal) ? ["Echo"] : []),
-          ...( /\\b(design|image|video|visual|creative|thumbnail)\\b/.test(textGoal) ? ["Pixel"] : []),
-          ...( /\\b(research|competitor|source|find|investigate|web)\\b/.test(textGoal) ? ["Scout", "Nova"] : []),
-          ...( /\\b(automate|workflow|integration|schedule)\\b/.test(textGoal) ? ["Piper"] : []),
-          ...( /\\b(data|metrics|analytics|report|operations)\\b/.test(textGoal) ? ["Orbit"] : []),
-          ...( /\\b(document|knowledge|manual|guide|resource)\\b/.test(textGoal) ? ["Sage"] : [])
+          ...( /\b(code|bug|deploy|api|website|build|software|github)\b/.test(textGoal) ? ["Forge"] : []),
+          ...( /\b(security|test|audit|risk|qa|review)\b/.test(textGoal) ? ["Quinn"] : []),
+          ...( /\b(social|publish|campaign|caption|marketing|brand|email|content)\b/.test(textGoal) ? ["Echo"] : []),
+          ...( /\b(design|image|video|visual|creative|thumbnail)\b/.test(textGoal) ? ["Pixel"] : []),
+          ...( /\b(research|competitor|source|find|investigate|web)\b/.test(textGoal) ? ["Scout", "Nova"] : []),
+          ...( /\b(automate|workflow|integration|schedule)\b/.test(textGoal) ? ["Piper"] : []),
+          ...( /\b(data|metrics|analytics|report|operations)\b/.test(textGoal) ? ["Orbit"] : []),
+          ...( /\b(document|knowledge|manual|guide|resource)\b/.test(textGoal) ? ["Sage"] : [])
         ];
         const unique = [...new Set(fallbackNames)].slice(0, 4);
-        agents = (unique.length ? unique : ["Atlas", "Forge"]).map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
+        agents = (unique.length ? unique : ["Forge"]).filter((name) => name !== "Atlas").map((name) => roster.find((agent) => agent.name === name)).filter((agent): agent is Agent => Boolean(agent));
         routingNote = "Keyword-based fallback routing used because the model router did not return valid JSON.";
       }
-      if (!agents.length) agents = roster.filter((agent) => ["Forge", "Echo"].includes(agent.name));
+      if (!agents.length) agents = eligibleRoster.filter((agent) => ["Forge", "Echo"].includes(agent.name));
     }
     if (!agents.length) return NextResponse.json({ error: "No eligible agents could be selected from the standby roster." }, { status: 503 });
 
