@@ -49,18 +49,9 @@ CREATE TABLE IF NOT EXISTS video_brand_kits (
   UNIQUE(workspace_id, name)
 );
 
-DO $
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'video_projects_brand_kit_id_fkey'
-      AND conrelid = 'video_projects'::regclass
-  ) THEN
-    ALTER TABLE video_projects
-      ADD CONSTRAINT video_projects_brand_kit_id_fkey
-      FOREIGN KEY (brand_kit_id) REFERENCES video_brand_kits(id) ON DELETE SET NULL;
-  END IF;
-END $;
+-- Brand-kit association is resolved by workspace/project metadata; no cyclic FK is required.
+
+
 
 CREATE TABLE IF NOT EXISTS video_jobs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
