@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Mono, Manrope, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import "./backend.css";
+import "./workspace.css";
 import WorldNavigation from "@/components/WorldNavigation";
 
 const manrope = Manrope({ subsets: ["latin"], display: "swap", variable: "--font-manrope" });
