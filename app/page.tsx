@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import WorldNavigation from "@/components/WorldNavigation";
 import { useRouter } from "next/navigation";
 import { useWorldStore, type DistrictId } from "@/lib/world-store";
 
@@ -167,6 +168,7 @@ export default function Home() {
 
   return <main className="app-shell">
     <header className="topbar"><Link className="brand" href="/"><span className="brand-mark">B</span><span>BLUEHAVEN <i>AI WORLD</i></span></Link><div className="top-status"><span className="online-dot" /> WORKSPACE CONTROL <span className="top-divider" /> <Link className="company-hq-link" href="/company">COMPANY HQ ↗</Link> <Link className="company-hq-link" href="/connections">CHANNELS ↗</Link> <span className="profile">B</span></div></header>
+    <WorldNavigation />
     <section className="intro-row"><div><p className="kicker"><span /> BUILDER BASE / LEVEL 01</p><h1>Your AI village.<br/><em>Your rules.</em></h1><p className="intro-text">Build a living AI company in a 3D village. Create agents, give them dedicated buildings, and track real deployment status backed by your workspace services.</p><button className="gold-button" onClick={() => { setActionError(""); setShowWizard(true); }}>＋ Build a new project <span>↗</span></button></div><div className="village-stats"><div><strong>{projects.length.toString().padStart(2,"0")}</strong><span>PROJECT BUILDINGS</span></div><div><strong>{projects.filter((p) => ["active","processing"].includes(p.status)).length.toString().padStart(2,"0")}</strong><span>ACTIVE PROJECTS</span></div><div><strong>{projects.filter((p) => ["under_construction","initializing"].includes(p.status)).length.toString().padStart(2,"0")}</strong><span>UNDER CONSTRUCTION</span></div></div></section>
     <section className="world-section"><div className="world-heading"><div><span className="section-tag">01 / LIVE WORLD MAP</span><h2>World overview</h2></div><div className="world-legend"><span><i className="legend-green" /> Active</span><span><i className="legend-gold" /> Building</span><span className="camera-hint">DRAG TO ROTATE · SCROLL TO ZOOM</span></div></div>
       {loadError && <div className="service-alert" role="alert"><strong>Village connection issue</strong><span>{loadError}</span><button onClick={() => { setLoading(true); void refreshProjects(); }}>Retry</button></div>}
