@@ -4,19 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/", label: "AI Village", description: "Main workspace" },
-  { href: "/company", label: "Company HQ", description: "Teams and operations" },
-  { href: "/company/command", label: "AI Missions", description: "Orchestrate agents" },
-  { href: "/creator-command-center", label: "Creator Command", description: "Content planning and approvals" },
-  { href: "/video-studio", label: "Video Studio", description: "Create and manage videos" },
-  { href: "/connections", label: "Channels", description: "Accounts and publishing" },
+  { href: "/features", label: "All Features", description: "Workspace directory" },
+  { href: "/", label: "AI Village", description: "3D workspace overview" },
+  { href: "/projects", label: "Projects", description: "Project portfolio and status" },
+  { href: "/company", label: "Company HQ", description: "Leadership and operations" },
+  { href: "/agents", label: "AI Agents", description: "Agent roster and departments" },
+  { href: "/company/command", label: "AI Missions", description: "Coordinate specialist agents" },
+  { href: "/creator-command-center", label: "Creator Studio", description: "Campaigns, drafts and approvals" },
+  { href: "/video-studio", label: "Video Studio", description: "Video production workspace" },
+  { href: "/connections", label: "Channels", description: "Social accounts and publishing" },
+  { href: "/knowledge", label: "Knowledge", description: "Documents and knowledge workflows" },
+  { href: "/infrastructure", label: "Infrastructure", description: "Models, gateway and database" },
 ];
 
 export default function WorldNavigation() {
   const pathname = usePathname();
   return (
-    <nav className="world-navigation" aria-label="BlueHaven AI World features">
-      <div className="world-navigation-label">WORKSPACE</div>
+    <nav className="world-navigation" aria-label="BlueHaven AI World main navigation">
+      <Link className="world-navigation-label" href="/features">AI WORLD / MENU</Link>
       <div className="world-navigation-links">
         {links.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(item.href + "/");
