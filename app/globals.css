@@ -1118,3 +1118,16 @@ body { background: #0b1016; }
   .intro-row > div:first-child { flex: 1 1 auto; }
   .village-stats { width: 100%; min-width: 0; flex: 0 0 auto; }
 }
+
+
+/* Shared navigation for every BlueHaven AI World workspace. */
+.world-navigation{position:relative;z-index:20;display:flex;align-items:center;gap:18px;padding:12px clamp(18px,3vw,42px);border-bottom:1px solid rgba(255,255,255,.09);background:rgba(12,13,18,.96);backdrop-filter:blur(18px)}
+.world-navigation-label{flex:0 0 auto;font:10px var(--font-dm-mono),monospace;letter-spacing:.16em;color:#ffde59}
+.world-navigation-links{display:flex;align-items:stretch;gap:6px;min-width:0;overflow-x:auto;scrollbar-width:thin}
+.world-navigation-link{display:flex;flex:0 0 auto;flex-direction:column;gap:3px;padding:8px 12px;border:1px solid transparent;border-radius:5px;color:#d4d4d8;text-decoration:none;transition:background .18s ease,border-color .18s ease,color .18s ease}
+.world-navigation-link span{font-size:12px;font-weight:650;white-space:nowrap}
+.world-navigation-link small{font-size:10px;color:#85858f;white-space:nowrap}
+.world-navigation-link:hover{background:#1b1b22;border-color:#3f3f46;color:#fff}
+.world-navigation-link.is-active{background:rgba(255,222,89,.09);border-color:rgba(255,222,89,.35);color:#ffde59}
+.world-navigation-link.is-active small{color:#c7b977}
+@media(max-width:700px){.world-navigation{align-items:flex-start;flex-direction:column;gap:7px;padding:10px 16px}.world-navigation-links{width:100%;gap:4px}.world-navigation-link{padding:8px 10px}.world-navigation-link small{display:none}}
