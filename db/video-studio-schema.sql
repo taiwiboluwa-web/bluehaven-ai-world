@@ -49,10 +49,6 @@ CREATE TABLE IF NOT EXISTS video_brand_kits (
   UNIQUE(workspace_id, name)
 );
 
--- Brand-kit association is resolved by workspace/project metadata; no cyclic FK is required.
-
-
-
 CREATE TABLE IF NOT EXISTS video_jobs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id UUID NOT NULL REFERENCES video_workspaces(id) ON DELETE RESTRICT,
