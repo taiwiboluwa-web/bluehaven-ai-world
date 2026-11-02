@@ -108,3 +108,26 @@ npm run lint
 ```
 
 Keep server secrets in deployment environment variables. Never commit API keys or database credentials.
+
+
+## BlueHaven AI Video Studio
+
+The first Video Studio foundation lives at `/video-studio` and uses the existing AI World Neon project through an isolated development branch during implementation.
+
+- `GET /api/video-studio/health` reports database and private-worker configuration readiness without returning credentials.
+- `GET /api/video-studio/jobs` lists workspace jobs; `POST /api/video-studio/jobs` creates a production draft.
+- Both job endpoints require `Authorization: Bearer <CHO_ADMIN_TOKEN or AGENT_SERVICE_TOKEN>`. Do not expose either token in browser code.
+- Draft creation does not submit a job to MoneyPrinterTurbo. Generation remains disabled until a private worker is deployed, authenticated, health-checked, and verified with test renders.
+- Video metadata is stored in additive `video_*` tables. Generated files will live in private object storage; Neon stores metadata and object keys, not MP4 binaries.
+- Human approval is required before publishing. Provider credentials belong in server-side secret configuration; Neon stores secret references only.
+
+### Private worker configuration
+
+Set these server-only variables after the worker is deployed:
+
+- `VIDEO_ENGINE_ENABLED=true`
+- `VIDEO_ENGINE_BASE_URL=https://<private-worker-host>`
+- `VIDEO_ENGINE_API_KEY=<worker-api-key>`
+- `VIDEO_ENGINE_TIMEOUT_MS=15000`
+
+Until those values are configured and tested, the Studio reports the engine as disconnected and does not generate videos. See [Video Studio architecture](docs/video-studio-architecture.md) for the staged rollout and security boundaries.
